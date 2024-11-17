@@ -8,8 +8,8 @@
 class UI {
 public:
     bool initialize();
-    void handleEvents(Client& client, bool& running);
-    void handleEvents(Server& server, bool& running);
+    void run(Client& client);
+    void run(Server& server);
     void cleanup();
 
 private:

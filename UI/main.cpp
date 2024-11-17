@@ -1,46 +1,56 @@
+#include "main.h"
+#include "UI.h"
 #include <Client.h>
 #include <Server.h>
-#include <thread>
 #include <optional>
-#include "UI.h"
+#include <thread>
 
-#define SERVER
+int main(int argc, char *args[]) {
+  UI ui;
 
-void runServer(Server& server) {
-    if (server.start(1234)) {
-        while (true) {
-            server.receiveData();
-        }
+  Mode mode = SelectNetworkMode();
+
+  if (!ui.initialize()) {
+    return 1;
+  }
+
+  if (mode == SERVER_MODE) {
+    Server server;
+    
+    if (!server.canFindAPort()) {
+      return 0;
     }
+
+    std::thread serverThread(&Server::start, &server);
+
+    ui.run(server);
+    serverThread.join();
+  } else if(mode == CLIENT_MODE) {
+    int port;
+    std::cout << "Enter port to connect to: ";
+    std::cin >> port;
+    Client client;
+    if (client.connect("localhost", port)) {
+      ui.run(client);
+    }
+  }
+
+  ui.cleanup();
+
+  return 0;
 }
 
-int main(int argc, char* args[]) {
-    bool running = true;
-    UI ui;
-
-#ifdef SERVER
-    Server server;
-    std::thread serverThread(runServer, std::ref(server));
-
-    if (!ui.initialize()) {
-        return 1;
+Mode SelectNetworkMode() {
+  int selection = 0;
+  while (selection != SERVER_MODE && selection != CLIENT_MODE) {
+    std::cout << "Select mode:\n";
+    std::cout << "1. Server\n";
+    std::cout << "2. Client\n";
+    std::cout << "Enter 1 or 2: ";
+    std::cin >> selection;
+    if (selection != SERVER_MODE && selection != CLIENT_MODE) {
+      std::cout << "Invalid selection. Please enter 1 or 2.\n";
     }
-
-    ui.handleEvents(server, running);
-    ui.cleanup();
-
-    serverThread.join();
-#else
-    Client client;
-    if (client.connect("localhost", 1234)) {
-        if (!ui.initialize()) {
-            return 1;
-        }
-
-        ui.handleEvents(client, running);
-        ui.cleanup();
-    }
-#endif
-
-    return 0;
+  }
+  return static_cast<Mode>(selection);
 }

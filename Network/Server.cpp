@@ -15,37 +15,50 @@ Server::~Server() {
   enet_deinitialize();
 }
 
-bool Server::start(uint16_t port) {
+void Server::start() {
   ENetAddress address{};
   address.host = ENET_HOST_ANY;
   address.port = port;
   server = enet_host_create(&address, 1, 2, 0, 0);
-  return server != nullptr;
-}
-
-void Server::receiveData() {
-  ENetEvent event;
-  while (enet_host_service(server, &event, 1000000) > 0) {
-    switch (event.type) {
-    case ENET_EVENT_TYPE_CONNECT:
-      std::cout << "A new client connected." << std::endl;
-      clientPeer = event.peer;
-      break;
-    case ENET_EVENT_TYPE_RECEIVE: {
-      std::string receivedData(reinterpret_cast<char *>(event.packet->data),
-                               event.packet->dataLength);
-      channel.send(receivedData);
-      enet_packet_destroy(event.packet);
-      break;
-    }
-    case ENET_EVENT_TYPE_DISCONNECT:
-      std::cout << "Client disconnected." << std::endl;
-      clientPeer = nullptr;
-      break;
-    default:
-      break;
+  if (server != nullptr) {
+    ENetEvent event;
+    while (enet_host_service(server, &event, 1000000) > 0) {
+      switch (event.type) {
+      case ENET_EVENT_TYPE_CONNECT:
+        std::cout << "A new client connected." << std::endl;
+        clientPeer = event.peer;
+        break;
+      case ENET_EVENT_TYPE_RECEIVE: {
+        std::string receivedData(reinterpret_cast<char *>(event.packet->data),
+                                 event.packet->dataLength);
+        channel.send(receivedData);
+        enet_packet_destroy(event.packet);
+        break;
+      }
+      case ENET_EVENT_TYPE_DISCONNECT:
+        std::cout << "Client disconnected." << std::endl;
+        clientPeer = nullptr;
+        break;
+      default:
+        break;
+      }
     }
   }
+}
+
+bool Server::canFindAPort() {
+  ENetAddress address;
+  address.host = ENET_HOST_ANY;
+  for (port = 2001; port <= 65535; ++port) {
+    address.port = port;
+    ENetHost *server = enet_host_create(&address, 1, 2, 0, 0);
+    if (server) {
+      enet_host_destroy(server);
+      std::cout << "Port selected: " << port << std::endl;
+      return true;
+    }
+  }
+  return false;
 }
 
 void Server::sendData(const char *message) {
