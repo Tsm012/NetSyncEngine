@@ -49,7 +49,7 @@ void Server::start() {
 bool Server::canFindAPort() {
   ENetAddress address;
   address.host = ENET_HOST_ANY;
-  for (port = 2001; port <= 65535; ++port) {
+  for (port = 2000; port <= 4000; port++) {
     address.port = port;
     ENetHost *server = enet_host_create(&address, 1, 2, 0, 0);
     if (server) {

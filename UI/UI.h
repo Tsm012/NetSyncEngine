@@ -7,7 +7,7 @@
 
 class UI {
 public:
-    bool initialize();
+    bool initialize(std::string title);
     void run(Client& client);
     void run(Server& server);
     void cleanup();
