@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   }
 
   int port = 0;
-  
+
   if (args.find("-port") != args.end()) {
     std::cout << "Port: " << args["-port"] << std::endl;
     port = std::stoi(args["-port"]);
@@ -50,7 +50,15 @@ int main(int argc, char *argv[]) {
 
   Client client;
   if (client.connect("localhost", port)) {
-    ui.run(client);
+    while (ui.running) {
+      auto rect = ui.update();
+      if (ui.changed) {
+        unsigned char byteArray[sizeof(SDL_Rect)];
+        std::memcpy(byteArray, &rect, sizeof(SDL_Rect));
+        client.sendData(byteArray, sizeof(SDL_Rect));
+        ui.changed = false;
+      }
+    }
   }
 
   ui.cleanup();

@@ -29,12 +29,7 @@ bool UI::initialize(std::string title) {
   return true;
 }
 
-void UI::run(Client &client) {
-  SDL_Event event;
-  bool running = true;
-  int moveStep = 10;
-
-  while (running) {
+SDL_Rect UI::update() {
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
         running = false;
@@ -42,19 +37,19 @@ void UI::run(Client &client) {
         switch (event.key.keysym.sym) {
         case SDLK_UP:
           redBox.y -= moveStep;
-          client.sendData("up");
+          changed = true;
           break;
         case SDLK_DOWN:
           redBox.y += moveStep;
-          client.sendData("down");
+          changed = true;
           break;
         case SDLK_LEFT:
           redBox.x -= moveStep;
-          client.sendData("left");
+          changed = true;
           break;
         case SDLK_RIGHT:
           redBox.x += moveStep;
-          client.sendData("right");
+          changed = true;
           break;
         }
       }
@@ -75,53 +70,7 @@ void UI::run(Client &client) {
 
     // Delay to control frame rate (e.g., 60 FPS)
     SDL_Delay(16);
-  }
-}
-
-void UI::run(Server &server) {
-  SDL_Event event;
-  bool running = true;
-  int moveStep = 10;
-
-  while (running) {
-    std::optional<std::string> message = server.getChannel().receive();
-    if (message.has_value()) {
-      std::string msg = message.value();
-      if (msg.compare(0, 4, "left") == 0 && msg.length() >= 4) {
-        redBox.x -= moveStep;
-      } else if (msg.compare(0, 5, "right") == 0 && msg.length() >= 5) {
-        redBox.x += moveStep;
-      } else if (msg.compare(0, 2, "up") == 0 && msg.length() >= 2) {
-        redBox.y -= moveStep;
-      } else if (msg.compare(0, 4, "down") == 0 && msg.length() >= 4) {
-        redBox.y += moveStep;
-      }
-      std::cout << "Main thread updated redBox position: " << redBox.x << ", "
-                << redBox.y << std::endl;
-    }
-
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        running = false;
-      }
-    }
-
-    // Set render draw color (white)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-    // Clear the window
-    SDL_RenderClear(renderer);
-
-    // Set render draw color (red) for the red box
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &redBox);
-
-    // Update the screen
-    SDL_RenderPresent(renderer);
-
-    // Delay to control frame rate (e.g., 60 FPS)
-    SDL_Delay(16);
-  }
+    return redBox;
 }
 
 void UI::cleanup() {
