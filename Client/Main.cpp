@@ -10,59 +10,73 @@
 #include "UI.h"
 
 std::map<std::string, std::string> parseCommandLineArguments(int argc,
-                                                             char *argv[]) {
-  std::map<std::string, std::string> args;
-  for (int i = 1; i < argc; ++i) {
-    std::string arg = argv[i];
-    size_t pos = arg.find('=');
-    if (pos != std::string::npos) {
-      std::string key = arg.substr(0, pos);
-      std::string value = arg.substr(pos + 1);
-      args[key] = value;
-    }
-  }
-  return args;
+	char* argv[])
+{
+	std::map<std::string, std::string> args;
+	for (int i = 1; i < argc; ++i)
+	{
+		std::string arg = argv[i];
+		size_t pos = arg.find('=');
+		if (pos != std::string::npos)
+		{
+			std::string key = arg.substr(0, pos);
+			std::string value = arg.substr(pos + 1);
+			args[key] = value;
+		}
+	}
+	return args;
 }
 
-int main(int argc, char *argv[]) {
-  std::map<std::string, std::string> args =
-      parseCommandLineArguments(argc, argv);
+int main(int argc, char* argv[])
+{
+	std::map<std::string, std::string> args =
+		parseCommandLineArguments(argc, argv);
 
-  if (args.find("-host") != args.end()) {
-    std::cout << "Host: " << args["-host"] << std::endl;
-  } else {
-    std::cout << "Host argument not provided!" << std::endl;
-  }
+	if (args.find("-host") != args.end())
+	{
+		std::cout << "Host: " << args["-host"] << std::endl;
+	}
+	else
+	{
+		std::cout << "Host argument not provided!" << std::endl;
+	}
 
-  int port = 0;
+	int port = 0;
 
-  if (args.find("-port") != args.end()) {
-    std::cout << "Port: " << args["-port"] << std::endl;
-    port = std::stoi(args["-port"]);
-  } else {
-    std::cout << "Port argument not provided!" << std::endl;
-  }
+	if (args.find("-port") != args.end())
+	{
+		std::cout << "Port: " << args["-port"] << std::endl;
+		port = std::stoi(args["-port"]);
+	}
+	else
+	{
+		std::cout << "Port argument not provided!" << std::endl;
+	}
 
-  UI ui;
+	UI ui;
 
-  if (!ui.initialize("Client")) {
-    return 1;
-  }
+	if (!ui.initialize("Client"))
+	{
+		return 1;
+	}
 
-  Client client;
-  if (client.connect("localhost", port)) {
-    while (ui.running) {
-      auto rect = ui.update();
-      if (ui.changed) {
-        unsigned char byteArray[sizeof(SDL_Rect)];
-        std::memcpy(byteArray, &rect, sizeof(SDL_Rect));
-        client.sendData(byteArray, sizeof(SDL_Rect));
-        ui.changed = false;
-      }
-    }
-  }
+	Client client;
+	if (client.connect("localhost", port))
+	{
+		while (ui.running)
+		{
+			auto rect = ui.update();
+			if (ui.changed)
+			{
+				unsigned char byteArray[sizeof(SDL_Rect)];
+				std::memcpy(byteArray, &rect, sizeof(SDL_Rect));
+				client.sendData(byteArray, sizeof(SDL_Rect));
+				ui.changed = false;
+			}
+		}
+	}
 
-  ui.cleanup();
+	ui.cleanup();
 
-  return 0;
+	return 0;
 }
