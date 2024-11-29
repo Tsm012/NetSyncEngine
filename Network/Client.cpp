@@ -1,6 +1,7 @@
 #pragma once
-#include "pch.h"
 #include "Client.h"
+
+#include "pch.h"
 
 Client::Client() : client(nullptr), peer(nullptr) {
   if (enet_initialize() != 0) {
@@ -49,7 +50,7 @@ bool Client::connect(const char *host, uint16_t port) {
   }
 }
 
-void Client::sendData(const unsigned char* byteArray, size_t size) {
+void Client::sendData(const unsigned char *byteArray, size_t size) {
   ENetPacket *packet =
       enet_packet_create(byteArray, size, ENET_PACKET_FLAG_RELIABLE);
   enet_peer_send(peer, 0, packet);
@@ -60,17 +61,17 @@ void Client::receiveData() {
   ENetEvent event;
   while (enet_host_service(client, &event, 1000) > 0) {
     switch (event.type) {
-    case ENET_EVENT_TYPE_RECEIVE:
-      std::cout << "A packet of length " << event.packet->dataLength
-                << " containing '" << event.packet->data << "' was received."
-                << std::endl;
-      enet_packet_destroy(event.packet);
-      break;
-    case ENET_EVENT_TYPE_DISCONNECT:
-      std::cout << "Disconnected from server." << std::endl;
-      return;
-    default:
-      break;
+      case ENET_EVENT_TYPE_RECEIVE:
+        std::cout << "A packet of length " << event.packet->dataLength
+                  << " containing '" << event.packet->data << "' was received."
+                  << std::endl;
+        enet_packet_destroy(event.packet);
+        break;
+      case ENET_EVENT_TYPE_DISCONNECT:
+        std::cout << "Disconnected from server." << std::endl;
+        return;
+      default:
+        break;
     }
   }
 }

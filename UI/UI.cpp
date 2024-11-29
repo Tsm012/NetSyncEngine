@@ -30,11 +30,11 @@ bool UI::initialize(std::string title) {
 }
 
 SDL_Rect UI::update() {
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        running = false;
-      } else if (event.type == SDL_KEYDOWN) {
-        switch (event.key.keysym.sym) {
+  while (SDL_PollEvent(&event)) {
+    if (event.type == SDL_QUIT) {
+      running = false;
+    } else if (event.type == SDL_KEYDOWN) {
+      switch (event.key.keysym.sym) {
         case SDLK_UP:
           redBox.y -= moveStep;
           changed = true;
@@ -51,26 +51,26 @@ SDL_Rect UI::update() {
           redBox.x += moveStep;
           changed = true;
           break;
-        }
       }
     }
+  }
 
-    // Set render draw color (white)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  // Set render draw color (white)
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-    // Clear the window
-    SDL_RenderClear(renderer);
+  // Clear the window
+  SDL_RenderClear(renderer);
 
-    // Set render draw color (red) for the red box
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &redBox);
+  // Set render draw color (red) for the red box
+  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+  SDL_RenderFillRect(renderer, &redBox);
 
-    // Update the screen
-    SDL_RenderPresent(renderer);
+  // Update the screen
+  SDL_RenderPresent(renderer);
 
-    // Delay to control frame rate (e.g., 60 FPS)
-    SDL_Delay(16);
-    return redBox;
+  // Delay to control frame rate (e.g., 60 FPS)
+  SDL_Delay(16);
+  return redBox;
 }
 
 void UI::cleanup() {

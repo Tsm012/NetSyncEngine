@@ -1,11 +1,13 @@
-#include "UI.h"
 #include <Client.h>
 #include <Server.h>
+
 #include <iostream>
 #include <map>
 #include <optional>
 #include <string>
 #include <thread>
+
+#include "UI.h"
 
 std::map<std::string, std::string> parseCommandLineArguments(int argc,
                                                              char *argv[]) {
@@ -23,7 +25,6 @@ std::map<std::string, std::string> parseCommandLineArguments(int argc,
 }
 
 int main(int argc, char *argv[]) {
-
   std::map<std::string, std::string> args =
       parseCommandLineArguments(argc, argv);
 

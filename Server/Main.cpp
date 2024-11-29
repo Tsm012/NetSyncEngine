@@ -1,6 +1,7 @@
 #pragma once
 #include <Server.h>
 #include <UI.h>
+
 #include <thread>
 
 int main(int argc, char *args[]) {
@@ -19,13 +20,13 @@ int main(int argc, char *args[]) {
   std::thread serverThread(&Server::start, &server);
 
   while (ui.running) {
-    std::optional<std::vector<unsigned char>> message = server.getChannel().receive();
+    std::optional<std::vector<unsigned char>> message =
+        server.getChannel().receive();
     if (message.has_value()) {
-      if (message.value().size() == sizeof(SDL_Rect)) 
-      { 
-          SDL_Rect rect; 
-          std::memcpy(&rect, message.value().data(), sizeof(SDL_Rect)); 
-          ui.redBox = rect; 
+      if (message.value().size() == sizeof(SDL_Rect)) {
+        SDL_Rect rect;
+        std::memcpy(&rect, message.value().data(), sizeof(SDL_Rect));
+        ui.redBox = rect;
       }
     }
     ui.update();
