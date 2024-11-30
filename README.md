@@ -16,8 +16,6 @@ NetSyncSDL is an educational 2D game engine designed to teach the principles of 
 
 - **Windows OS**: Ensure you are running Windows.
 - **MSVC**: Microsoft Visual C++ compiler.
-- **SDL2**: Simple DirectMedia Layer 2 library.
-- **ENet**: Reliable UDP networking library.
 
 ### Installation
 
