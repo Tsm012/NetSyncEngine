@@ -25,7 +25,8 @@ int main(int argc, char* args[])
 	while (ui.running)
 	{
 		std::optional<std::vector<unsigned char>> message =
-			server.getChannel().receive();
+			server.getChannel().fetchReceivedData();
+
 		if (message.has_value())
 		{
 			if (message.value().size() == sizeof(SDL_Rect))

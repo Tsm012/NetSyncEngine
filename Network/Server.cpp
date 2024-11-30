@@ -1,7 +1,6 @@
 #pragma once
-#include "Server.h"
-
 #include "pch.h"
+#include "Server.h"
 
 Server::Server() : server(nullptr), clientPeer(nullptr)
 {
@@ -34,15 +33,19 @@ void Server::start()
 			switch (event.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
+			{
 				std::cout << "A new client connected." << std::endl;
+				const char* ack = "";
+				sendData(reinterpret_cast<const unsigned char*>(ack), strlen(ack) + 1);
 				clientPeer = event.peer;
 				break;
+			}
 			case ENET_EVENT_TYPE_RECEIVE:
 			{
 				std::vector<unsigned char> receivedData(
 					event.packet->data,
 					event.packet->data + event.packet->dataLength);
-				channel.send(receivedData.data(), event.packet->dataLength);
+				channel.setReceivedData(receivedData.data(), event.packet->dataLength);
 				enet_packet_destroy(event.packet);
 				break;
 			}
@@ -68,7 +71,7 @@ bool Server::canFindAPort()
 		if (server)
 		{
 			enet_host_destroy(server);
-			std::cout << "Port selected: " << port << std::endl;
+			std::cout << "Server port selected: " << port << std::endl;
 			return true;
 		}
 	}

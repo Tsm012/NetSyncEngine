@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "UI.h"
+#include "Main.h"
 
 std::map<std::string, std::string> parseCommandLineArguments(int argc,
 	char* argv[])
@@ -32,26 +33,8 @@ int main(int argc, char* argv[])
 	std::map<std::string, std::string> args =
 		parseCommandLineArguments(argc, argv);
 
-	if (args.find("-host") != args.end())
-	{
-		std::cout << "Host: " << args["-host"] << std::endl;
-	}
-	else
-	{
-		std::cout << "Host argument not provided!" << std::endl;
-	}
-
-	int port = 0;
-
-	if (args.find("-port") != args.end())
-	{
-		std::cout << "Port: " << args["-port"] << std::endl;
-		port = std::stoi(args["-port"]);
-	}
-	else
-	{
-		std::cout << "Port argument not provided!" << std::endl;
-	}
+	const char* host = getHost(args);
+	int port = getPort(args);
 
 	UI ui;
 
@@ -61,22 +44,51 @@ int main(int argc, char* argv[])
 	}
 
 	Client client;
-	if (client.connect("localhost", port))
+	std::thread clientSendThread(&Client::connect, &client, host, port);
+	while (!client.getChannel().connected)
 	{
-		while (ui.running)
+		Sleep(100);
+	}
+
+	std::thread clientReceiveThread(&Client::receiveData, &client);
+
+	while (ui.running)
+	{
+		auto rect = ui.update();
+		if (ui.changed)
 		{
-			auto rect = ui.update();
-			if (ui.changed)
-			{
-				unsigned char byteArray[sizeof(SDL_Rect)];
-				std::memcpy(byteArray, &rect, sizeof(SDL_Rect));
-				client.sendData(byteArray, sizeof(SDL_Rect));
-				ui.changed = false;
-			}
+			unsigned char byteArray[sizeof(SDL_Rect)];
+			std::memcpy(byteArray, &rect, sizeof(SDL_Rect));
+			client.getChannel().setDataToSend(byteArray, sizeof(SDL_Rect));
+			ui.changed = false;
 		}
 	}
+	clientSendThread.join();
+	clientReceiveThread.join();
 
 	ui.cleanup();
 
 	return 0;
+}
+
+int getPort(std::map<std::string, std::string>& args)
+{
+	if (args.find("-port") != args.end())
+	{
+		std::cout << "Port: " << args["-port"] << std::endl;
+		return std::stoi(args["-port"]);
+	}
+	std::cout << "Port argument not provided!" << std::endl;
+	exit(0);
+}
+
+const char* getHost(std::map<std::string, std::string>& args)
+{
+	if (args.find("-host") != args.end())
+	{
+		std::cout << "Host: " << args["-host"] << std::endl;
+		return args["-host"].c_str();
+	}
+	std::cout << "Host argument not provided!" << std::endl;
+	exit(0);
 }

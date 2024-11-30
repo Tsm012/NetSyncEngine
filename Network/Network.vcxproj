@@ -147,7 +147,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Server.h" />
-    <ClInclude Include="ThreadSafeStringChannel.h" />
+    <ClInclude Include="ThreadSafeByteChannel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
