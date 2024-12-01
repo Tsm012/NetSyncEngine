@@ -10,24 +10,6 @@
 #include "UI.h"
 #include "Main.h"
 
-std::map<std::string, std::string> parseCommandLineArguments(int argc,
-	char* argv[])
-{
-	std::map<std::string, std::string> args;
-	for (int i = 1; i < argc; ++i)
-	{
-		std::string arg = argv[i];
-		size_t pos = arg.find('=');
-		if (pos != std::string::npos)
-		{
-			std::string key = arg.substr(0, pos);
-			std::string value = arg.substr(pos + 1);
-			args[key] = value;
-		}
-	}
-	return args;
-}
-
 int main(int argc, char* argv[])
 {
 	std::map<std::string, std::string> args =
@@ -69,6 +51,24 @@ int main(int argc, char* argv[])
 	ui.cleanup();
 
 	return 0;
+}
+
+std::map<std::string, std::string> parseCommandLineArguments(int argc,
+	char* argv[])
+{
+	std::map<std::string, std::string> args;
+	for (int i = 1; i < argc; ++i)
+	{
+		std::string arg = argv[i];
+		size_t pos = arg.find('=');
+		if (pos != std::string::npos)
+		{
+			std::string key = arg.substr(0, pos);
+			std::string value = arg.substr(pos + 1);
+			args[key] = value;
+		}
+	}
+	return args;
 }
 
 int getPort(std::map<std::string, std::string>& args)
