@@ -7,7 +7,7 @@
 #include <string>
 #include <thread>
 
-#include "UI.h"
+#include <UI.h>
 #include "Main.h"
 
 int main(int argc, char* argv[])
@@ -39,9 +39,9 @@ int main(int argc, char* argv[])
 		auto rect = ui.update();
 		if (ui.changed)
 		{
-			unsigned char byteArray[sizeof(SDL_Rect)];
-			std::memcpy(byteArray, &rect, sizeof(SDL_Rect));
-			client.getChannel().setDataToSend(byteArray, sizeof(SDL_Rect));
+			unsigned char byteArray[sizeof(SDL_FRect)];
+			std::memcpy(byteArray, &rect, sizeof(SDL_FRect));
+			client.getChannel().setDataToSend(byteArray, sizeof(SDL_FRect));
 			ui.changed = false;
 		}
 	}

@@ -104,15 +104,20 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)dependencies\enet-1.3.18\include;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL2-2.30.9\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>enet64.lib;Shell32.lib;SDL2.lib;SDL2main.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\enet-1.3.18;$(SolutionDir)dependencies\SDL2-2.30.9\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>enet64.lib;Shell32.lib;SDL3.lib;winmm.lib;ws2_32.lib;setupapi.lib;version.lib;SDL3_image.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)UI;$(SolutionDir)dependencies\enet-1.3.18;$(SolutionDir)dependencies\SDL_image\VisualC\x64\Release;$(SolutionDir)dependencies\SDL\VisualC\x64\Release</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)UI\Player.bmp $(ProjectDir)
+copy $(SolutionDir)dependencies\SDL_image\VisualC\x64\Release\SDL3_image.dll $(ProjectDir) </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

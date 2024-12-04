@@ -29,10 +29,10 @@ int main(int argc, char* args[])
 
 		if (message.has_value())
 		{
-			if (message.value().size() == sizeof(SDL_Rect))
+			if (message.value().size() == sizeof(SDL_FRect))
 			{
-				SDL_Rect rect;
-				std::memcpy(&rect, message.value().data(), sizeof(SDL_Rect));
+				SDL_FRect rect;
+				std::memcpy(&rect, message.value().data(), sizeof(SDL_FRect));
 				ui.redBox = rect;
 			}
 		}
