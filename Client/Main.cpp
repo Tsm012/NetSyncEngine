@@ -36,11 +36,12 @@ int main(int argc, char* argv[])
 
 	while (ui.running)
 	{
-		auto rect = ui.update();
+		ui.update();
+
 		if (ui.changed)
 		{
 			unsigned char byteArray[sizeof(SDL_FRect)];
-			std::memcpy(byteArray, &rect, sizeof(SDL_FRect));
+			std::memcpy(byteArray, &ui.redBox, sizeof(SDL_FRect));
 			client.getChannel().setDataToSend(byteArray, sizeof(SDL_FRect));
 			ui.changed = false;
 		}

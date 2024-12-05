@@ -8,22 +8,26 @@ class UI
 {
 public:
 	bool initialize(std::string title);
-	SDL_FRect update();
+	void update();
+	void getInput();
 	void cleanup();
-	bool running = true;
+
 	SDL_FRect redBox = { 100, 150, 100, 100 };  // Fixed size for red box
+
+	bool running = true;
 	bool changed = true;
 
 private:
-	SDL_Window* window = nullptr;
-	SDL_Renderer* renderer = nullptr;
-	SDL_Texture* texture = nullptr;  // Texture for the player image
+	SDL_Window* window;
+	SDL_Renderer* renderer;
+	SDL_Texture* texture;
 	SDL_Event event;
-	int moveStep = 10;
+
+	int moveStep = 15;
 
 	// Function to load texture from BMP file
-	bool loadTexture(SDL_Renderer* renderer, std::string path);
+	bool loadTexture(std::string path);
 
 	// Function to render the texture
-	void renderTexture(SDL_FRect redbox);
+	void render();
 };

@@ -39,7 +39,7 @@ bool UI::initialize(std::string title)
 	}
 
 	// Load the player image
-	if (!loadTexture(renderer, "Player.bmp"))
+	if (!loadTexture("Player.bmp"))
 	{
 		std::cerr << "Failed to load texture!" << std::endl;
 		SDL_DestroyRenderer(renderer);
@@ -49,11 +49,14 @@ bool UI::initialize(std::string title)
 		return false;
 	}
 
+	// Set render draw color (white)
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
 	return true;
 }
 
 
-bool UI::loadTexture(SDL_Renderer* renderer, std::string path)
+bool UI::loadTexture(std::string path)
 {
 	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
 	if (loadedSurface == nullptr)
@@ -86,7 +89,14 @@ bool UI::loadTexture(SDL_Renderer* renderer, std::string path)
 	return true;
 }
 
-SDL_FRect UI::update()
+void UI::update()
+{
+	getInput();
+
+	render();
+}
+
+void UI::getInput()
 {
 	while (SDL_PollEvent(&event))
 	{
@@ -117,30 +127,18 @@ SDL_FRect UI::update()
 			}
 		}
 	}
+}
 
-	// Set render draw color (white)
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
+void UI::render()
+{
 	// Clear the window
 	SDL_RenderClear(renderer);
 
-	// Render the texture
-	renderTexture(redBox);
-
-	// Set render draw color (red) for the red box
+	// Render Box
+	SDL_RenderTexture(renderer, texture, nullptr, &redBox);  // Use SDL_RenderCopyF
 
 	// Update the screen
 	SDL_RenderPresent(renderer);
-
-	// Delay to control frame rate (e.g., 60 FPS)
-	SDL_Delay(16);
-	return redBox;
-}
-
-void UI::renderTexture(SDL_FRect redbox)
-{
-	SDL_FRect destRect = { 400.0f, 300.0f, 100.0f, 100.0f }; // Position and size of the image
-	SDL_RenderTexture(renderer, texture, nullptr, &redbox);  // Use SDL_RenderCopyF
 }
 
 void UI::cleanup()
