@@ -1,47 +1,10 @@
 #pragma once
-#include <Server.h>
-#include <UI.h>
+#include <Engine.h>
 
 #include <thread>
 
 int main(int argc, char* args[])
 {
-	UI ui;
-
-	if (!ui.initialize("Server"))
-	{
-		return 1;
-	}
-
-	Server server;
-
-	if (!server.canFindAPort())
-	{
-		return 0;
-	}
-
-	std::thread serverThread(&Server::start, &server);
-
-	while (ui.running)
-	{
-		std::optional<std::vector<unsigned char>> message =
-			server.getChannel().fetchReceivedData();
-
-		if (message.has_value())
-		{
-			if (message.value().size() == sizeof(SDL_FRect))
-			{
-				SDL_FRect rect;
-				std::memcpy(&rect, message.value().data(), sizeof(SDL_FRect));
-				ui.redBox = rect;
-			}
-		}
-		ui.update();
-	}
-
-	serverThread.join();
-
-	ui.cleanup();
-
+	Engine().run();
 	return 0;
 }

@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -143,15 +143,12 @@ copy $(SolutionDir)dependencies\SDL_image\VisualC\x64\Release\SDL3_image.dll $(P
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Network\Network.vcxproj">
-      <Project>{bb652ade-dde1-4975-bbbc-50b1630ec055}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\UI\UI.vcxproj">
-      <Project>{185dcf30-f170-4f0b-970a-b86deb38b549}</Project>
-    </ProjectReference>
+    <ClInclude Include="Main.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Main.h" />
+    <ProjectReference Include="..\Engine\Engine.vcxproj">
+      <Project>{27459f57-1064-4adc-b594-885f499115d4}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

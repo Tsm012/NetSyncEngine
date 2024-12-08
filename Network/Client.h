@@ -4,22 +4,25 @@
 
 #include <iostream>
 
-class Client
+namespace Network
 {
-public:
-	Client();
-	~Client();
-	void connect(const char* host, uint16_t port);
-	void sendData(const unsigned char* byteArray, size_t size);
-	void receiveData();
-
-	ThreadSafeByteChannel& getChannel()
+	class Client
 	{
-		return channel;
-	}
+	public:
+		Client();
+		~Client();
+		void connect(const char* host, uint16_t port);
+		void sendData(const unsigned char* byteArray, size_t size);
+		void receiveData();
 
-private:
-	ENetHost* client;
-	ENetPeer* peer;
-	ThreadSafeByteChannel channel;
-};
+		ThreadSafeByteChannel& getChannel()
+		{
+			return channel;
+		}
+
+	private:
+		ENetHost* client;
+		ENetPeer* peer;
+		ThreadSafeByteChannel channel;
+	};
+}

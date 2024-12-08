@@ -4,23 +4,26 @@
 
 #include <iostream>
 
-class Server
+namespace Network
 {
-public:
-	Server();
-	~Server();
-	bool canFindAPort();
-	void start();
-	void sendData(const unsigned char* byteArray, size_t size);
-
-	ThreadSafeByteChannel& getChannel()
+	class Server
 	{
-		return channel;
-	}
+	public:
+		Server();
+		~Server();
+		bool canFindAPort();
+		void start();
+		void sendData(const unsigned char* byteArray, size_t size);
 
-private:
-	ENetHost* server;
-	ENetPeer* clientPeer;
-	ThreadSafeByteChannel channel;
-	uint16_t port;
-};
+		ThreadSafeByteChannel& getChannel()
+		{
+			return channel;
+		}
+
+	private:
+		ENetHost* server;
+		ENetPeer* clientPeer;
+		ThreadSafeByteChannel channel;
+		uint16_t port;
+	};
+}

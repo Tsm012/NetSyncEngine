@@ -1,5 +1,5 @@
 #include "UI.h"
-#include <SDL3/SDL.h>
+#include "Object.h"
 #include <SDL3_image/SDL_image.h> // Include SDL_image
 
 
@@ -38,15 +38,14 @@ bool UI::initialize(std::string title)
 		return false;
 	}
 
-	// Load the player image
-	if (!loadTexture("Player.bmp"))
+	//TODO remove once we have a way to save state
+	float offset = 100;
+	for (Object& object : gameObjects)
 	{
-		std::cerr << "Failed to load texture!" << std::endl;
-		SDL_DestroyRenderer(renderer);
-		SDL_DestroyWindow(window);
-		IMG_Quit();
-		SDL_Quit();
-		return false;
+		object.boundingBox = SDL_FRect{ offset, 100, 175, 100 };
+		object.texture = loadTexture("Player.bmp");
+		object.moveStep = 15;
+		offset = offset + 200;
 	}
 
 	// Set render draw color (white)
@@ -55,14 +54,13 @@ bool UI::initialize(std::string title)
 	return true;
 }
 
-
-bool UI::loadTexture(std::string path)
+SDL_Texture* UI::loadTexture(std::string path)
 {
 	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
 	if (loadedSurface == nullptr)
 	{
 		std::cerr << "Unable to load image " << path << "! IMG_Error: " << SDL_GetError() << std::endl;
-		return false;
+		return nullptr;
 	}
 
 	// Check if the surface is valid
@@ -70,23 +68,23 @@ bool UI::loadTexture(std::string path)
 	{
 		std::cerr << "Invalid surface dimensions!" << std::endl;
 		SDL_DestroySurface(loadedSurface);
-		return false;
+		return nullptr;
 	}
 
 	// Print surface details
 	std::cout << "Surface loaded: " << path << "\n"
 		<< "Width: " << loadedSurface->w << ", Height: " << loadedSurface->h << std::endl;
 
-	texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
 	SDL_DestroySurface(loadedSurface);
 
 	if (texture == nullptr)
 	{
 		std::cerr << "Unable to create texture from " << path << "! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
+		return nullptr;
 	}
 
-	return true;
+	return texture;
 }
 
 void UI::update()
@@ -96,6 +94,7 @@ void UI::update()
 	render();
 }
 
+//TODO seperate the game object updates from this function
 void UI::getInput()
 {
 	while (SDL_PollEvent(&event))
@@ -106,24 +105,27 @@ void UI::getInput()
 		}
 		else if (event.type == SDL_EVENT_KEY_DOWN)
 		{
-			switch (event.key.scancode)
+			for (Object& object : gameObjects)
 			{
-			case SDL_SCANCODE_UP:
-				redBox.y -= moveStep;
-				changed = true;
-				break;
-			case SDL_SCANCODE_DOWN:
-				redBox.y += moveStep;
-				changed = true;
-				break;
-			case SDL_SCANCODE_LEFT:
-				redBox.x -= moveStep;
-				changed = true;
-				break;
-			case SDL_SCANCODE_RIGHT:
-				redBox.x += moveStep;
-				changed = true;
-				break;
+				switch (event.key.scancode)
+				{
+				case SDL_SCANCODE_UP:
+					object.boundingBox.y -= object.moveStep;
+					changed = true;
+					break;
+				case SDL_SCANCODE_DOWN:
+					object.boundingBox.y += object.moveStep;
+					changed = true;
+					break;
+				case SDL_SCANCODE_LEFT:
+					object.boundingBox.x -= object.moveStep;
+					changed = true;
+					break;
+				case SDL_SCANCODE_RIGHT:
+					object.boundingBox.x += object.moveStep;
+					changed = true;
+					break;
+				}
 			}
 		}
 	}
@@ -133,9 +135,11 @@ void UI::render()
 {
 	// Clear the window
 	SDL_RenderClear(renderer);
+	for (Object object : gameObjects)
+	{
+		SDL_RenderTexture(renderer, object.texture, nullptr, &object.boundingBox);  // Use SDL_RenderCopyF
+	}
 
-	// Render Box
-	SDL_RenderTexture(renderer, texture, nullptr, &redBox);  // Use SDL_RenderCopyF
 
 	// Update the screen
 	SDL_RenderPresent(renderer);
@@ -143,14 +147,19 @@ void UI::render()
 
 void UI::cleanup()
 {
-	if (texture != nullptr)
+	for (Object object : gameObjects)
 	{
-		SDL_DestroyTexture(texture);
-		texture = nullptr;
+		if (object.texture != nullptr)
+		{
+			SDL_DestroyTexture(object.texture);
+			//object.texture = nullptr;
+		}
 	}
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
-	IMG_Quit();  // Quit SDL_image
+	IMG_Quit();
 	SDL_Quit();
 }
+
+

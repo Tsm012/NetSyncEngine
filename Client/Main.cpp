@@ -1,13 +1,9 @@
-#include <Client.h>
-#include <Server.h>
-
 #include <iostream>
 #include <map>
 #include <optional>
 #include <string>
-#include <thread>
+#include <Engine.h>
 
-#include <UI.h>
 #include "Main.h"
 
 int main(int argc, char* argv[])
@@ -18,38 +14,7 @@ int main(int argc, char* argv[])
 	const char* host = getHost(args);
 	int port = getPort(args);
 
-	UI ui;
-
-	if (!ui.initialize("Client"))
-	{
-		return 1;
-	}
-
-	Client client;
-	std::thread clientSendThread(&Client::connect, &client, host, port);
-	while (!client.getChannel().connected)
-	{
-		Sleep(100);
-	}
-
-	std::thread clientReceiveThread(&Client::receiveData, &client);
-
-	while (ui.running)
-	{
-		ui.update();
-
-		if (ui.changed)
-		{
-			unsigned char byteArray[sizeof(SDL_FRect)];
-			std::memcpy(byteArray, &ui.redBox, sizeof(SDL_FRect));
-			client.getChannel().setDataToSend(byteArray, sizeof(SDL_FRect));
-			ui.changed = false;
-		}
-	}
-	clientSendThread.join();
-	clientReceiveThread.join();
-
-	ui.cleanup();
+	Engine(Engine::Client, host, port).run();
 
 	return 0;
 }

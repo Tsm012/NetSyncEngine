@@ -2,88 +2,91 @@
 #include "pch.h"
 #include "Server.h"
 
-Server::Server() : server(nullptr), clientPeer(nullptr)
+namespace Network
 {
-	if (enet_initialize() != 0)
+	Server::Server() : server(nullptr), clientPeer(nullptr)
 	{
-		std::cerr << "An error occurred while initializing ENet." << std::endl;
-	}
-}
-
-Server::~Server()
-{
-	if (server != nullptr)
-	{
-		enet_host_destroy(server);
-	}
-	enet_deinitialize();
-}
-
-void Server::start()
-{
-	ENetAddress address{};
-	address.host = ENET_HOST_ANY;
-	address.port = port;
-	server = enet_host_create(&address, 1, 2, 0, 0);
-	if (server != nullptr)
-	{
-		ENetEvent event;
-		while (enet_host_service(server, &event, 1000000) > 0)
+		if (enet_initialize() != 0)
 		{
-			switch (event.type)
-			{
-			case ENET_EVENT_TYPE_CONNECT:
-			{
-				std::cout << "A new client connected." << std::endl;
-				const char* ack = "";
-				sendData(reinterpret_cast<const unsigned char*>(ack), strlen(ack) + 1);
-				clientPeer = event.peer;
-				break;
-			}
-			case ENET_EVENT_TYPE_RECEIVE:
-			{
-				std::vector<unsigned char> receivedData(
-					event.packet->data,
-					event.packet->data + event.packet->dataLength);
-				channel.setReceivedData(receivedData.data(), event.packet->dataLength);
-				enet_packet_destroy(event.packet);
-				break;
-			}
-			case ENET_EVENT_TYPE_DISCONNECT:
-				std::cout << "Client disconnected." << std::endl;
-				clientPeer = nullptr;
-				break;
-			default:
-				break;
-			}
+			std::cerr << "An error occurred while initializing ENet." << std::endl;
 		}
 	}
-}
 
-bool Server::canFindAPort()
-{
-	ENetAddress address;
-	address.host = ENET_HOST_ANY;
-	for (port = 2000; port <= 4000; port++)
+	Server::~Server()
 	{
-		address.port = port;
-		ENetHost* server = enet_host_create(&address, 1, 2, 0, 0);
-		if (server)
+		if (server != nullptr)
 		{
 			enet_host_destroy(server);
-			std::cout << "Server port selected: " << port << std::endl;
-			return true;
+		}
+		enet_deinitialize();
+	}
+
+	void Server::start()
+	{
+		ENetAddress address{};
+		address.host = ENET_HOST_ANY;
+		address.port = port;
+		server = enet_host_create(&address, 1, 2, 0, 0);
+		if (server != nullptr)
+		{
+			ENetEvent event;
+			while (enet_host_service(server, &event, 1000000) > 0)
+			{
+				switch (event.type)
+				{
+				case ENET_EVENT_TYPE_CONNECT:
+				{
+					std::cout << "A new client connected." << std::endl;
+					const char* ack = "";
+					sendData(reinterpret_cast<const unsigned char*>(ack), strlen(ack) + 1);
+					clientPeer = event.peer;
+					break;
+				}
+				case ENET_EVENT_TYPE_RECEIVE:
+				{
+					std::vector<unsigned char> receivedData(
+						event.packet->data,
+						event.packet->data + event.packet->dataLength);
+					channel.setReceivedData(receivedData.data(), event.packet->dataLength);
+					enet_packet_destroy(event.packet);
+					break;
+				}
+				case ENET_EVENT_TYPE_DISCONNECT:
+					std::cout << "Client disconnected." << std::endl;
+					clientPeer = nullptr;
+					break;
+				default:
+					break;
+				}
+			}
 		}
 	}
-	return false;
-}
-void Server::sendData(const unsigned char* byteArray, size_t size)
-{
-	if (clientPeer != nullptr)
+
+	bool Server::canFindAPort()
 	{
-		ENetPacket* packet =
-			enet_packet_create(byteArray, size, ENET_PACKET_FLAG_RELIABLE);
-		enet_peer_send(clientPeer, 0, packet);
-		enet_host_flush(server);
+		ENetAddress address;
+		address.host = ENET_HOST_ANY;
+		for (port = 2000; port <= 4000; port++)
+		{
+			address.port = port;
+			ENetHost* server = enet_host_create(&address, 1, 2, 0, 0);
+			if (server)
+			{
+				enet_host_destroy(server);
+				std::cout << "Server port selected: " << port << std::endl;
+				return true;
+			}
+		}
+		return false;
+	}
+	void Server::sendData(const unsigned char* byteArray, size_t size)
+	{
+		if (clientPeer != nullptr)
+		{
+			ENetPacket* packet =
+				enet_packet_create(byteArray, size, ENET_PACKET_FLAG_RELIABLE);
+			enet_peer_send(clientPeer, 0, packet);
+			enet_host_flush(server);
+		}
 	}
 }
