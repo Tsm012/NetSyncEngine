@@ -71,10 +71,6 @@ SDL_Texture* UI::loadTexture(std::string path)
 		return nullptr;
 	}
 
-	// Print surface details
-	std::cout << "Surface loaded: " << path << "\n"
-		<< "Width: " << loadedSurface->w << ", Height: " << loadedSurface->h << std::endl;
-
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
 	SDL_DestroySurface(loadedSurface);
 

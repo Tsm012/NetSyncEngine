@@ -1,29 +1,19 @@
 #pragma once
-#include <ThreadSafeByteChannel.h>
 #include <enet/enet.h>
+#include "NetworkConnection.h"
 
-#include <iostream>
 
 namespace Network
 {
-	class Server
+	class Server : public NetworkConnection
 	{
 	public:
 		Server();
 		~Server();
+		void start() override;
 		bool canFindAPort();
-		void start();
-		void sendData(const unsigned char* byteArray, size_t size);
-
-		ThreadSafeByteChannel& getChannel()
-		{
-			return channel;
-		}
 
 	private:
-		ENetHost* server;
-		ENetPeer* clientPeer;
-		ThreadSafeByteChannel channel;
 		uint16_t port;
 	};
 }

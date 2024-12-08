@@ -5,83 +5,29 @@
 #include <thread>
 #include <map>
 #include <Client.h>
-#include <UI.h>
 #include <Server.h>
 
 Engine::Engine() : connectionType(Server), host("localhost"), port(2000)
 {
+	initialize(connectionType, host, port);
+}
+Engine::Engine(ConnectionType connectionType, const char* host, int port) : connectionType(connectionType), host(host), port(port)
+{
+	initialize(connectionType, host, port);
 }
 
-Engine::Engine(ConnectionType connectionType, const char* host, int port) : connectionType(connectionType), host(std::move(host)), port(port)
+void Engine::initialize(Engine::ConnectionType connectionType, const char* host, int port)
 {
-}
-
-void Engine::run()
-{
-	UI ui;
-
-	if (!ui.initialize(connectionType == Server ? "Server" : "Client"))
-	{
-		return;
-	}
-
 	switch (connectionType)
 	{
 	case Engine::Server:
 	{
-		Network::Server server;
-		if (!server.canFindAPort())
-		{
-			return;
-		}
-
-		std::thread serverThread(&Network::Server::start, &server);
-		while (ui.running)
-		{
-			std::optional<std::vector<unsigned char>> message =
-				server.getChannel().fetchReceivedData();
-
-			if (message.has_value())
-			{
-				if (message.value().size() == sizeof(ui.gameObjects))
-				{
-					Object gameObjects[sizeof(ui.gameObjects)];
-					std::memcpy(&gameObjects, message.value().data(), sizeof(ui.gameObjects));
-					for (size_t i = 0; i < std::size(ui.gameObjects); ++i)
-					{
-						ui.gameObjects[i].boundingBox = gameObjects[i].boundingBox;
-					}
-				}
-			}
-			ui.update();
-		}
-
-		serverThread.join();
+		connection = new Network::Server();
 		break;
 	}
 	case Engine::Client:
 	{
-		Network::Client client;
-		std::thread clientSendThread(&Network::Client::connect, &client, host, port);
-		while (!client.getChannel().connected)
-		{
-			Sleep(100);
-		}
-		std::thread clientReceiveThread(&Network::Client::receiveData, &client);
-		while (ui.running)
-		{
-			ui.update();
-
-			if (ui.changed)
-			{
-				unsigned char byteArray[sizeof(ui.gameObjects)];
-				std::memcpy(byteArray, &ui.gameObjects, sizeof(ui.gameObjects));
-				client.getChannel().setDataToSend(byteArray, sizeof(ui.gameObjects));
-				ui.changed = false;
-			}
-		}
-		clientSendThread.join();
-		clientReceiveThread.join();
+		connection = new Network::Client(host, port);
 		break;
 	}
 	default:
@@ -89,5 +35,56 @@ void Engine::run()
 		return;
 	}
 
+	if (!ui.initialize(connectionType == Server ? "Server" : "Client"))
+	{
+		std::cout << "Could not initialize UI" << std::endl;
+	}
+}
+void Engine::run()
+{
+	std::thread sendThread(&NetworkConnection::start, connection);
+
+	while (!connection->connected && !connection->hasError)
+	{
+		Sleep(100);
+	}
+
+	std::thread receiveThread(&NetworkConnection::receiveData, connection);
+
+	while (ui.running && connection->connected && !connection->hasError)
+	{
+		update();
+	}
+
+	sendThread.join();
+	receiveThread.join();
 	ui.cleanup();
+}
+
+void Engine::update()
+{
+	std::optional<std::vector<unsigned char>> message =
+		connection->getChannel().fetchReceivedData();
+
+	if (message.has_value())
+	{
+		if (message.value().size() == sizeof(ui.gameObjects))
+		{
+			Object gameObjects[sizeof(ui.gameObjects)];
+			std::memcpy(&gameObjects, message.value().data(), sizeof(ui.gameObjects));
+			for (size_t i = 0; i < std::size(ui.gameObjects); ++i)
+			{
+				ui.gameObjects[i].boundingBox = gameObjects[i].boundingBox;
+			}
+		}
+	}
+	ui.update();
+
+	if (ui.changed)
+	{
+		unsigned char byteArray[sizeof(ui.gameObjects)];
+		std::memcpy(byteArray, &ui.gameObjects, sizeof(ui.gameObjects));
+		connection->getChannel().setDataToSend(byteArray, sizeof(ui.gameObjects));
+		ui.changed = false;
+	}
 }

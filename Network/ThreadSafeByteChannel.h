@@ -50,7 +50,6 @@ public:
 			return std::nullopt;
 		}
 	}
-	bool connected = false;
 
 private:
 	std::vector<unsigned char> receivedData;
