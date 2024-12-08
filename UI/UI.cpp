@@ -136,7 +136,6 @@ void UI::render()
 		SDL_RenderTexture(renderer, object.texture, nullptr, &object.boundingBox);  // Use SDL_RenderCopyF
 	}
 
-
 	// Update the screen
 	SDL_RenderPresent(renderer);
 }

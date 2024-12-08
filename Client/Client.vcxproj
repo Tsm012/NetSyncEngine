@@ -158,7 +158,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\enet-1.3.18\include;$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)Engine;$(SolutionDir)dependencies\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\enet-1.3.18\include;$(SolutionDir)UI;$(SolutionDir)Utilities;$(SolutionDir)Network;$(SolutionDir)Engine;$(SolutionDir)dependencies\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -181,7 +181,7 @@ copy $(SolutionDir)dependencies\SDL_image\VisualC\x64\Release\SDL3_image.dll $(P
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)Engine;$(SolutionDir)dependencies\enet-1.3.18\include;$(SolutionDir)dependencies\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)Utilities;$(SolutionDir)Engine;$(SolutionDir)dependencies\enet-1.3.18\include;$(SolutionDir)dependencies\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -205,7 +205,7 @@ copy $(SolutionDir)dependencies\SDL_image\VisualC\x64\Release\SDL3_image.dll $(P
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)Engine;$(SolutionDir)dependencies\enet-1.3.18\include;$(SolutionDir)dependencies\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)Utilities;$(SolutionDir)Engine;$(SolutionDir)dependencies\enet-1.3.18\include;$(SolutionDir)dependencies\SDL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -228,11 +228,11 @@ del "$(TargetDir)*.pdb" /Q</Command>
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Main.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.vcxproj">
       <Project>{27459f57-1064-4adc-b594-885f499115d4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.vcxproj">
+      <Project>{02b7ddc5-4054-4676-8ecc-aa6be35e7487}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

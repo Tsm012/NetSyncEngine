@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 
 const char* getHost(std::map<std::string, std::string>& args);
 
