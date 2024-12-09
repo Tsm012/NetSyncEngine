@@ -6,7 +6,7 @@ NetSyncSDL is an educational 2D game engine designed to teach the principles of 
 
 ## Features
 
-- **2D Rendering**: Utilizes SDL2 for efficient 2D graphics rendering.
+- **2D Rendering**: Utilizes SDL3 for efficient 2D graphics rendering.
 - **Multiplayer Networking**: Built-in support for networked games using ENet.
 - **Educational Focus**: Perfect for those looking to learn the fundamentals of game development and networking in C++.
 
