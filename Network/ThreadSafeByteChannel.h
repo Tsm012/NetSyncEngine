@@ -7,10 +7,10 @@
 class ThreadSafeByteChannel
 {
 public:
-	void setDataToSend(const unsigned char* byteArray, size_t size)
+	void setDataToSend(std::vector<unsigned char> data)
 	{
 		std::lock_guard<std::mutex> lock(sendDataMtx);
-		dataToSend.assign(byteArray, byteArray + size);  // Copy data to the vector
+		dataToSend = data;  // Copy data to the vector
 		sendDataReady = true;
 		cvSend.notify_one();
 	}
@@ -29,10 +29,10 @@ public:
 		}
 	}
 
-	void setReceivedData(const unsigned char* byteArray, size_t size)
+	void setReceivedData(std::vector<unsigned char> data)
 	{
 		std::lock_guard<std::mutex> lock(receviedDataMtx);
-		receivedData.assign(byteArray, byteArray + size);  // Copy data to the vector
+		receivedData = data;  // Copy data to the vector
 		receivedDataReady = true;
 		cvReceived.notify_one();
 	}

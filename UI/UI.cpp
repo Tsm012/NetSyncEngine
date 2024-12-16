@@ -3,7 +3,7 @@
 #include <SDL3_image/SDL_image.h> // Include SDL_image
 
 
-bool UI::initialize(std::string title)
+bool UI::initialize(std::string title, std::vector<Object> gameObjects)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -36,16 +36,6 @@ bool UI::initialize(std::string title)
 		SDL_DestroyWindow(window);
 		SDL_Quit();
 		return false;
-	}
-
-	//TODO remove once we have a way to save state
-	float offset = 100;
-	for (Object& object : gameObjects)
-	{
-		object.boundingBox = SDL_FRect{ offset, 100, 175, 100 };
-		object.texture = loadTexture("Player.bmp");
-		object.moveStep = 15;
-		offset = offset + 200;
 	}
 
 	// Set render draw color (white)
@@ -83,71 +73,42 @@ SDL_Texture* UI::loadTexture(std::string path)
 	return texture;
 }
 
-void UI::update()
+void UI::update(std::vector<Object> gameObjects)
 {
 	getInput();
 
-	render();
+	render(gameObjects);
 }
 
-//TODO seperate the game object updates from this function
-void UI::getInput()
+SDL_Event UI::getInput()
 {
 	while (SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_EVENT_QUIT)
-		{
-			running = false;
-		}
-		else if (event.type == SDL_EVENT_KEY_DOWN)
-		{
-			for (Object& object : gameObjects)
-			{
-				switch (event.key.scancode)
-				{
-				case SDL_SCANCODE_UP:
-					object.boundingBox.y -= object.moveStep;
-					changed = true;
-					break;
-				case SDL_SCANCODE_DOWN:
-					object.boundingBox.y += object.moveStep;
-					changed = true;
-					break;
-				case SDL_SCANCODE_LEFT:
-					object.boundingBox.x -= object.moveStep;
-					changed = true;
-					break;
-				case SDL_SCANCODE_RIGHT:
-					object.boundingBox.x += object.moveStep;
-					changed = true;
-					break;
-				}
-			}
-		}
+		return event;
+
 	}
 }
 
-void UI::render()
+void UI::render(std::vector<Object> gameObjects)
 {
 	// Clear the window
 	SDL_RenderClear(renderer);
 	for (Object object : gameObjects)
 	{
-		SDL_RenderTexture(renderer, object.texture, nullptr, &object.boundingBox);  // Use SDL_RenderCopyF
+		SDL_RenderTexture(renderer, object.texture, nullptr, &object.boundingBox);
 	}
 
 	// Update the screen
 	SDL_RenderPresent(renderer);
 }
 
-void UI::cleanup()
+void UI::cleanup(std::vector<Object> gameObjects)
 {
 	for (Object object : gameObjects)
 	{
 		if (object.texture != nullptr)
 		{
 			SDL_DestroyTexture(object.texture);
-			//object.texture = nullptr;
 		}
 	}
 

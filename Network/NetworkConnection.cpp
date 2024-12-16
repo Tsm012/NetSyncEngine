@@ -38,7 +38,7 @@ void NetworkConnection::receiveData()
 				event.packet->data,
 				event.packet->data + event.packet->dataLength);
 			std::cout << "received data" << std::endl;
-			getChannel().setReceivedData(receivedData.data(), event.packet->dataLength);
+			getChannel().setReceivedData(receivedData);
 			enet_packet_destroy(event.packet);
 			break;
 		}
