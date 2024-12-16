@@ -40,7 +40,7 @@ void Engine::initialize(Engine::ConnectionType connectionType, const char* host,
 		std::cout << "Could not initialize UI" << std::endl;
 	}
 
-	gameObjects.push_back(Object(ui.loadTexture("Player.bmp"), SDL_FRect{ 100, 100, 175, 100 }, 15));
+	gameObjects.push_back(Sprite(ui.loadTexture("Player.bmp"), SDL_FRect{ 100, 100, 175, 100 }, 15));
 }
 void Engine::run()
 {
@@ -72,7 +72,7 @@ void Engine::update()
 	if (message.has_value())
 	{
 		int count = 0;
-		for (Object& object : deserializeVector(message.value()))
+		for (Sprite& object : deserializeVector(message.value()))
 		{
 			gameObjects[count].boundingBox = object.boundingBox;
 			count++;
@@ -112,10 +112,10 @@ void Engine::updateGameObjects(SDL_Event event)
 	}
 }
 
-std::vector<unsigned char> Engine::serializeVector(const std::vector<Object>& vec)
+std::vector<unsigned char> Engine::serializeVector(const std::vector<Sprite>& vec)
 {
 	std::vector<unsigned char> serializedData;
-	for (const Object& object : vec)
+	for (const Sprite& object : vec)
 	{
 		size_t dataSize = sizeof(object.boundingBox) + sizeof(object.moveStep);
 		std::vector<unsigned char> objData(dataSize);
@@ -130,9 +130,9 @@ std::vector<unsigned char> Engine::serializeVector(const std::vector<Object>& ve
 	return serializedData;
 }
 
-std::vector<Object> Engine::deserializeVector(const std::vector<unsigned char>& serializedData)
+std::vector<Sprite> Engine::deserializeVector(const std::vector<unsigned char>& serializedData)
 {
-	std::vector<Object> deserializedObjects;
+	std::vector<Sprite> deserializedObjects;
 	size_t offset = 0;
 
 	while (offset < serializedData.size())

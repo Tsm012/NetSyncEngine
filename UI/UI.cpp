@@ -1,9 +1,9 @@
 #include "UI.h"
-#include "Object.h"
+#include "Sprite.h"
 #include <SDL3_image/SDL_image.h> // Include SDL_image
 
 
-bool UI::initialize(std::string title, std::vector<Object> gameObjects)
+bool UI::initialize(std::string title, std::vector<Sprite> gameObjects)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -73,7 +73,7 @@ SDL_Texture* UI::loadTexture(std::string path)
 	return texture;
 }
 
-void UI::update(std::vector<Object> gameObjects)
+void UI::update(std::vector<Sprite> gameObjects)
 {
 	getInput();
 
@@ -89,11 +89,11 @@ SDL_Event UI::getInput()
 	}
 }
 
-void UI::render(std::vector<Object> gameObjects)
+void UI::render(std::vector<Sprite> gameObjects)
 {
 	// Clear the window
 	SDL_RenderClear(renderer);
-	for (Object object : gameObjects)
+	for (Sprite object : gameObjects)
 	{
 		SDL_RenderTexture(renderer, object.texture, nullptr, &object.boundingBox);
 	}
@@ -102,9 +102,9 @@ void UI::render(std::vector<Object> gameObjects)
 	SDL_RenderPresent(renderer);
 }
 
-void UI::cleanup(std::vector<Object> gameObjects)
+void UI::cleanup(std::vector<Sprite> gameObjects)
 {
-	for (Object object : gameObjects)
+	for (Sprite object : gameObjects)
 	{
 		if (object.texture != nullptr)
 		{

@@ -25,14 +25,14 @@ public:
 private:
 	void update();
 	void updateGameObjects(SDL_Event event);
-	std::vector<unsigned char> serializeVector(const std::vector<Object>& vec);
-	std::vector<Object> deserializeVector(const std::vector<unsigned char>& serializedData);
+	std::vector<unsigned char> serializeVector(const std::vector<Sprite>& vec);
+	std::vector<Sprite> deserializeVector(const std::vector<unsigned char>& serializedData);
 	UI ui;
 	NetworkConnection* connection;
 	ConnectionType connectionType;
 	const char* host;
 	int port;
 	bool running = true;
-	std::vector<Object> gameObjects;
+	std::vector<Sprite> gameObjects;
 };
 
