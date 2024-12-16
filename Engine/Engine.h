@@ -25,8 +25,8 @@ public:
 private:
 	void update();
 	void updateGameObjects(SDL_Event event);
-	std::vector<unsigned char> serializeVector(const std::vector<Sprite>& vec);
-	std::vector<Sprite> deserializeVector(const std::vector<unsigned char>& serializedData);
+	std::vector<unsigned char> serializeGameObjects(const std::vector<Sprite>& gameObjects);
+	std::vector<Sprite> deserializeGameObjects(const std::vector<unsigned char>& serializedGameObjects);
 	UI ui;
 	NetworkConnection* connection;
 	ConnectionType connectionType;

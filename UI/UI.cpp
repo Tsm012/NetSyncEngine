@@ -3,7 +3,7 @@
 #include <SDL3_image/SDL_image.h> // Include SDL_image
 
 
-bool UI::initialize(std::string title, std::vector<Sprite> gameObjects)
+bool UI::initialize(std::string title)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -71,13 +71,6 @@ SDL_Texture* UI::loadTexture(std::string path)
 	}
 
 	return texture;
-}
-
-void UI::update(std::vector<Sprite> gameObjects)
-{
-	getInput();
-
-	render(gameObjects);
 }
 
 SDL_Event UI::getInput()
