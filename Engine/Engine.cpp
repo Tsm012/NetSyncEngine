@@ -65,8 +65,7 @@ void Engine::run()
 
 void Engine::update()
 {
-	std::optional<std::vector<unsigned char>> message =
-		connection->getChannel().fetchReceivedData();
+	auto message = connection->getChannel().fetchReceivedData();
 
 	//Receive updates
 	if (message.has_value())
@@ -112,10 +111,10 @@ void Engine::updateGameObjects(SDL_Event event)
 	}
 }
 
-std::vector<unsigned char> Engine::serializeGameObjects(const std::vector<Sprite>& vec)
+std::vector<unsigned char> Engine::serializeGameObjects(const std::vector<Sprite>& gameObjects)
 {
 	std::vector<unsigned char> serializedData;
-	for (const Sprite& object : vec)
+	for (const Sprite& object : gameObjects)
 	{
 		size_t dataSize = sizeof(object.boundingBox) + sizeof(object.moveStep);
 		std::vector<unsigned char> objData(dataSize);
@@ -130,23 +129,23 @@ std::vector<unsigned char> Engine::serializeGameObjects(const std::vector<Sprite
 	return serializedData;
 }
 
-std::vector<Sprite> Engine::deserializeGameObjects(const std::vector<unsigned char>& serializedData)
+std::vector<Sprite> Engine::deserializeGameObjects(const std::vector<unsigned char>& serializedGameObjects)
 {
 	std::vector<Sprite> deserializedObjects;
 	size_t offset = 0;
 
-	while (offset < serializedData.size())
+	while (offset < serializedGameObjects.size())
 	{
 		// Deserialize one object
 		size_t objectSize = sizeof(SDL_FRect) + sizeof(int);
-		if (offset + objectSize > serializedData.size()) break;
+		if (offset + objectSize > serializedGameObjects.size()) break;
 
 		SDL_FRect boundingBox;
-		std::memcpy(&boundingBox, &serializedData[offset], sizeof(SDL_FRect));
+		std::memcpy(&boundingBox, &serializedGameObjects[offset], sizeof(SDL_FRect));
 		offset += sizeof(SDL_FRect);
 
 		int moveStep;
-		std::memcpy(&moveStep, &serializedData[offset], sizeof(int));
+		std::memcpy(&moveStep, &serializedGameObjects[offset], sizeof(int));
 		offset += sizeof(int);
 
 		// Add the deserialized object to the list
