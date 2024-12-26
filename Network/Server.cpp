@@ -10,6 +10,8 @@ namespace Network
 		if (enet_initialize() != 0)
 		{
 			std::cerr << "An error occurred while initializing ENet." << std::endl;
+			hasError = true;
+			return;
 		}
 
 		if (!canFindAPort())
@@ -17,6 +19,7 @@ namespace Network
 			std::cerr << "Unable to find open port between 2000 - 4000"
 				<< std::endl;
 			hasError = true;
+			return;
 		}
 
 		ENetAddress address{};
@@ -28,7 +31,11 @@ namespace Network
 		{
 			std::cerr << "An error occurred while trying to create an ENet client host."
 				<< std::endl;
+			hasError = true;
+			return;
 		}
+
+		connected = true;
 	}
 
 	Server::~Server()
@@ -42,16 +49,25 @@ namespace Network
 
 	void Server::start()
 	{
-		connected = true;
 		while (true)
 		{
-			auto message = channel.fetchSendData();
+			auto messages = channel.fetchSendData();
 
-			if (message.has_value())
+			for (auto& peer : channel.peers)
 			{
-				sendData(message.value().data(), message.value().size());
+				for (auto& message : messages)
+				{
+					sendData(peer, message.second);
+					std::cout << "Sent message of type: " << message.second.getMessageType() << " to peer." << std::endl;
+					channel.removeSendData(message.first);
+				}
 			}
 		}
+	}
+
+	unsigned int Server::handShake(Network::Message message)
+	{
+		return false;
 	}
 
 	bool Server::canFindAPort()

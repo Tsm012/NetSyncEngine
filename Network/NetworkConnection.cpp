@@ -4,17 +4,24 @@
 #include "NetworkConnection.h"
 #include <iostream>
 #include <ThreadSafeByteChannel.h>
+#include "Message.h"
 
-void NetworkConnection::sendData(const unsigned char* byteArray, size_t size)
+
+void NetworkConnection::sendData(ENetPeer* peer, Network::Message message)
 {
 	if (peer != nullptr)
 	{
 		ENetPacket* packet =
-			enet_packet_create(byteArray, size, ENET_PACKET_FLAG_RELIABLE);
+			enet_packet_create(message.serializeMessage().data(), message.serializeMessage().size(), ENET_PACKET_FLAG_RELIABLE);
 		enet_peer_send(peer, 0, packet);
 	}
 	enet_host_flush(host);
 }
+
+NetworkConnection::NetworkConnection() : host(nullptr), channel()
+{
+}
+
 
 void NetworkConnection::receiveData()
 {
@@ -26,28 +33,27 @@ void NetworkConnection::receiveData()
 		case ENET_EVENT_TYPE_CONNECT:
 		{
 			std::cout << "A new connection is established." << std::endl;
-			const char* ack = "";
-			sendData(reinterpret_cast<const unsigned char*>(ack), strlen(ack) + 1);
 			connected = true;
-			peer = event.peer;
+			getChannel().peers.push_back(event.peer);
+			getChannel().addMessageChannel(event.peer->incomingPeerID);
 			break;
 		}
 		case ENET_EVENT_TYPE_RECEIVE:
 		{
-			std::vector<unsigned char> receivedData(
-				event.packet->data,
-				event.packet->data + event.packet->dataLength);
-			std::cout << "received data" << std::endl;
-			getChannel().setReceivedData(receivedData);
+			auto message = Network::Message(event.packet->data, event.packet->dataLength);
+			getChannel().setReceivedData(event.peer->incomingPeerID, message);
+			std::cout << "Received data of type: " << message.getMessageType() << std::endl;
 			enet_packet_destroy(event.packet);
 			break;
 		}
 		case ENET_EVENT_TYPE_DISCONNECT:
 			std::cout << "Client disconnected." << std::endl;
-			peer = nullptr;
+			getChannel().peers.erase(std::remove(getChannel().peers.begin(), getChannel().peers.end(), event.peer), getChannel().peers.end());
+			getChannel().removeMessageChannel(event.peer->incomingPeerID);
 			break;
 		default:
 			break;
 		}
 	}
 }
+

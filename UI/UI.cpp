@@ -82,26 +82,32 @@ SDL_Event UI::getInput()
 	}
 }
 
-void UI::render(std::vector<Sprite> gameObjects)
+void UI::render(std::unordered_map<unsigned int, Sprite> players, std::unordered_map<unsigned int, Sprite> gameObjects)
 {
 	// Clear the window
 	SDL_RenderClear(renderer);
-	for (Sprite object : gameObjects)
+
+	for (std::pair<int, Sprite> object : players)
 	{
-		SDL_RenderTexture(renderer, object.texture, nullptr, &object.boundingBox);
+		SDL_RenderTexture(renderer, object.second.texture, nullptr, &object.second.boundingBox);
+	}
+
+	for (std::pair<int, Sprite> object : gameObjects)
+	{
+		SDL_RenderTexture(renderer, object.second.texture, nullptr, &object.second.boundingBox);
 	}
 
 	// Update the screen
 	SDL_RenderPresent(renderer);
 }
 
-void UI::cleanup(std::vector<Sprite> gameObjects)
+void UI::cleanup(std::unordered_map<unsigned int, Sprite> players, std::unordered_map<unsigned int, Sprite> gameObjects)
 {
-	for (Sprite object : gameObjects)
+	for (std::pair<int, Sprite> object : gameObjects)
 	{
-		if (object.texture != nullptr)
+		if (object.second.texture != nullptr)
 		{
-			SDL_DestroyTexture(object.texture);
+			SDL_DestroyTexture(object.second.texture);
 		}
 	}
 

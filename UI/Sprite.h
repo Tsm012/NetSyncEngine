@@ -3,11 +3,12 @@
 class Sprite
 {
 public:
+	unsigned int id = 0;
 	SDL_Texture* texture;
 	SDL_FRect boundingBox;
 	int moveStep;
 	Sprite();
-	Sprite(SDL_Texture* texture, const SDL_FRect& boundingBox, int moveStep);
+	Sprite(unsigned int id, SDL_Texture* texture, const SDL_FRect& boundingBox, int moveStep);
 private:
 };
 

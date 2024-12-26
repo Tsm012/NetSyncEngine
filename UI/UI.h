@@ -2,14 +2,15 @@
 #include <iostream>
 #include <vector>
 #include "Sprite.h"
+#include <unordered_map>
 
 class UI
 {
 public:
 	bool initialize(std::string title);
 	SDL_Event getInput();
-	void cleanup(std::vector<Sprite> gameObjects);
-	void render(std::vector<Sprite> gameObjects);
+	void cleanup(std::unordered_map<unsigned int, Sprite> players, std::unordered_map<unsigned int, Sprite> gameObjects);
+	void render(std::unordered_map<unsigned int, Sprite> players, std::unordered_map<unsigned int, Sprite> gameObjects);
 
 	// Function to load texture from BMP file
 	SDL_Texture* loadTexture(std::string path);

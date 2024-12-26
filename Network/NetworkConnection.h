@@ -1,11 +1,14 @@
 #pragma once
 #include <enet/enet.h>
 #include <ThreadSafeByteChannel.h>
+#include <Message.h>
 
 class NetworkConnection
 {
 public:
+	NetworkConnection();
 	virtual void start() = 0;
+	virtual unsigned int handShake(Network::Message message) = 0;
 	void receiveData();
 
 	ThreadSafeByteChannel& getChannel()
@@ -16,9 +19,9 @@ public:
 	bool hasError = false;
 protected:
 	ENetHost* host;
-	ENetPeer* peer;
 	ThreadSafeByteChannel channel;
-	void sendData(const unsigned char* byteArray, size_t size);
+	void sendData(ENetPeer* peer, Network::Message message);
+
 };
 
 

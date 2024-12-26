@@ -2,16 +2,30 @@
 #include "pch.h"
 #include "framework.h"
 #include "Engine.h"
-#include <thread>
 #include <map>
 #include <Client.h>
 #include <Server.h>
+#include <random>
+#include <thread>
 
 Engine::Engine() : connectionType(Server), host("localhost"), port(2000)
 {
 	initialize(connectionType, host, port);
+	auto texture = ui.loadTexture("Player.bmp");
+	playerId = generateRandomId();
+	players.insert({ playerId, Sprite(playerId, texture, SDL_FRect{250, 100, 175, 100}, 15) });
 }
-Engine::Engine(ConnectionType connectionType, const char* host, int port) : connectionType(connectionType), host(host), port(port)
+
+int Engine::generateRandomId()
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dis(100000, 999999);
+	return dis(gen);
+}
+
+Engine::Engine(ConnectionType connectionType, const char* host, int port)
+	: connectionType(connectionType), host(host), port(port)
 {
 	initialize(connectionType, host, port);
 }
@@ -40,18 +54,34 @@ void Engine::initialize(Engine::ConnectionType connectionType, const char* host,
 		std::cout << "Could not initialize UI" << std::endl;
 	}
 
-	gameObjects.push_back(Sprite(ui.loadTexture("Player.bmp"), SDL_FRect{ 100, 100, 175, 100 }, 15));
+
 }
 void Engine::run()
 {
-	std::thread sendThread(&NetworkConnection::start, connection);
+	std::thread receiveThread(&NetworkConnection::receiveData, connection);
 
 	while (!connection->connected && !connection->hasError)
 	{
 		Sleep(100);
 	}
 
-	std::thread receiveThread(&NetworkConnection::receiveData, connection);
+	auto thing = generateRandomId();
+	auto thing2 = std::vector<unsigned char>();
+	thing2.push_back(thing);
+	auto message2 = Network::Message(Network::Message::Hello, thing2);
+
+	if (connectionType == ConnectionType::Client)
+	{
+		playerId = connection->handShake(message2);
+		while (playerId == 0)
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+			playerId = connection->handShake(message2);
+		}
+		std::cout << "Player ID: " << playerId << std::endl; // Print the player ID here
+	}
+
+	std::thread sendThread(&NetworkConnection::start, connection);
 
 	while (running && connection->connected && !connection->hasError)
 	{
@@ -60,23 +90,70 @@ void Engine::run()
 
 	sendThread.join();
 	receiveThread.join();
-	ui.cleanup(gameObjects);
+	ui.cleanup(players, gameObjects);
 }
 
 void Engine::update()
 {
-	auto message = connection->getChannel().fetchReceivedData();
-
-	//Receive updates
-	if (message.has_value())
+	auto messageChannels = connection->getChannel().fetchReceivedData();
+	if (connectionType == ConnectionType::Server)
 	{
-		int count = 0;
-		for (Sprite& object : deserializeGameObjects(message.value()))
+		bool hit = false;
+		for (auto& channel : messageChannels)
 		{
-			gameObjects[count].boundingBox = object.boundingBox;
-			count++;
+			for (auto& message : channel.second)
+			{
+				if (message.second.getMessageType() == Network::Message::Hello)
+				{
+					hit = true;
+					unsigned int playerId = 0;
+					std::memcpy(&playerId, message.second.getPayload().data(), sizeof(unsigned int));
+					players.insert_or_assign(playerId, Sprite(playerId, ui.loadTexture("./Player.bmp"), SDL_FRect{ spawnX, 100, 175, 100 }, 15));
+					spawnX = spawnX + 100;
+					auto thing2 = std::vector<unsigned char>(sizeof(unsigned int));
+					std::memcpy(thing2.data(), &playerId, sizeof(unsigned int));
+					std::cout << "Result: " << playerId << "\n";
+					thing2.push_back(playerId);
+					auto thing = Network::Message(Network::Message::Hello, thing2);
+					connection->getChannel().setDataToSend(thing);
+				}
+				else
+				{
+					hit = true;
+					auto player = deserializeGameObject(message.second.getPayload());
+					players[player.id] = player;
+					players[player.id].texture = ui.loadTexture("./Player.bmp");
+				}
+
+				connection->getChannel().removeFetchData(channel.first, message.first);
+			}
+		}
+		if (hit)
+		{
+			auto thing = Network::Message(Network::Message::Replication, serializeGameObjects(players));
+			connection->getChannel().setDataToSend(thing);
 		}
 	}
+	else
+	{
+		for (auto channel : messageChannels)
+		{
+			for (auto message : channel.second)
+			{
+				if (message.second.getMessageType() == message.second.Replication)
+				{
+					players = deserializeGameObjects(message.second.getPayload());
+					for (auto& player : players)
+					{
+						player.second = Sprite(player.second.id, ui.loadTexture("./Player.bmp"), player.second.boundingBox, player.second.moveStep);
+					}
+					connection->getChannel().removeFetchData(channel.first, message.first);
+				}
+
+			}
+		}
+	}
+
 	SDL_Event event = ui.getInput();
 
 	if (event.type == SDL_EVENT_QUIT)
@@ -85,11 +162,21 @@ void Engine::update()
 	}
 	else if (event.type == SDL_EVENT_KEY_DOWN)
 	{
-		updateGameObjects(event);
-		connection->getChannel().setDataToSend(serializeGameObjects(gameObjects));
+		if (connectionType == ConnectionType::Server)
+		{
+			updateGameObjects(event);
+			auto thing = Network::Message(Network::Message::Replication, serializeGameObjects(players));
+			connection->getChannel().setDataToSend(thing);
+		}
+		else
+		{
+			updateGameObjects(event);
+			auto thing = Network::Message(Network::Message::Replication, serializeGameObject(players[playerId]));
+			connection->getChannel().setDataToSend(thing);
+		}
 	}
 
-	ui.render(gameObjects);
+	ui.render(players, gameObjects);
 }
 
 void Engine::updateGameObjects(SDL_Event event)
@@ -97,48 +184,50 @@ void Engine::updateGameObjects(SDL_Event event)
 	switch (event.key.scancode)
 	{
 	case SDL_SCANCODE_UP:
-		gameObjects[0].boundingBox.y -= gameObjects[0].moveStep;
+		players[playerId].boundingBox.y -= players[playerId].moveStep;
 		break;
 	case SDL_SCANCODE_DOWN:
-		gameObjects[0].boundingBox.y += gameObjects[0].moveStep;
+		players[playerId].boundingBox.y += players[playerId].moveStep;
 		break;
 	case SDL_SCANCODE_LEFT:
-		gameObjects[0].boundingBox.x -= gameObjects[0].moveStep;
+		players[playerId].boundingBox.x -= players[playerId].moveStep;
 		break;
 	case SDL_SCANCODE_RIGHT:
-		gameObjects[0].boundingBox.x += gameObjects[0].moveStep;
+		players[playerId].boundingBox.x += players[playerId].moveStep;
 		break;
 	}
 }
 
-std::vector<unsigned char> Engine::serializeGameObjects(const std::vector<Sprite>& gameObjects)
+std::vector<unsigned char> Engine::serializeGameObjects(const std::unordered_map<unsigned int, Sprite>& gameObjects)
 {
 	std::vector<unsigned char> serializedData;
-	for (const Sprite& object : gameObjects)
+	for (const auto& object : gameObjects)
 	{
-		size_t dataSize = sizeof(object.boundingBox) + sizeof(object.moveStep);
+		size_t dataSize = sizeof(object.first) + sizeof(object.second.boundingBox) + sizeof(object.second.moveStep);
 		std::vector<unsigned char> objData(dataSize);
 		size_t offset = 0;
-		std::memcpy(objData.data() + offset, &object.boundingBox, sizeof(object.boundingBox));
-		offset += sizeof(object.boundingBox);
-		std::memcpy(objData.data() + offset, &object.moveStep, sizeof(object.moveStep));
-		offset += sizeof(object.moveStep);
+		std::memcpy(objData.data() + offset, &object.first, sizeof(object.first));
+		offset += sizeof(object.first);
+		std::memcpy(objData.data() + offset, &object.second.boundingBox, sizeof(object.second.boundingBox));
+		offset += sizeof(object.second.boundingBox);
+		std::memcpy(objData.data() + offset, &object.second.moveStep, sizeof(object.second.moveStep));
+		offset += sizeof(object.second.moveStep);
 
 		serializedData.insert(serializedData.end(), objData.begin(), objData.end());
 	}
 	return serializedData;
 }
 
-std::vector<Sprite> Engine::deserializeGameObjects(const std::vector<unsigned char>& serializedGameObjects)
+std::unordered_map<unsigned int, Sprite> Engine::deserializeGameObjects(const std::vector<unsigned char>& serializedGameObjects)
 {
-	std::vector<Sprite> deserializedObjects;
+	std::unordered_map<unsigned int, Sprite> deserializedObjects;
 	size_t offset = 0;
 
 	while (offset < serializedGameObjects.size())
 	{
-		// Deserialize one object
-		size_t objectSize = sizeof(SDL_FRect) + sizeof(int);
-		if (offset + objectSize > serializedGameObjects.size()) break;
+		int id;
+		std::memcpy(&id, &serializedGameObjects[offset], sizeof(int));
+		offset += sizeof(int);
 
 		SDL_FRect boundingBox;
 		std::memcpy(&boundingBox, &serializedGameObjects[offset], sizeof(SDL_FRect));
@@ -149,9 +238,44 @@ std::vector<Sprite> Engine::deserializeGameObjects(const std::vector<unsigned ch
 		offset += sizeof(int);
 
 		// Add the deserialized object to the list
-		deserializedObjects.emplace_back(nullptr, boundingBox, moveStep);
+		deserializedObjects.insert({ id, Sprite(id, nullptr, boundingBox, moveStep) });
 	}
 
 	return deserializedObjects;
 }
+
+std::vector<unsigned char>Engine::serializeGameObject(Sprite object)
+{
+	size_t dataSize = sizeof(object.boundingBox) + sizeof(object.moveStep) + sizeof(object.id);
+	std::vector<unsigned char> objData(dataSize);
+	size_t offset = 0;
+	std::memcpy(objData.data() + offset, &object.id, sizeof(object.id));
+	offset += sizeof(object.id);
+	std::memcpy(objData.data() + offset, &object.boundingBox, sizeof(object.boundingBox));
+	offset += sizeof(object.boundingBox);
+	std::memcpy(objData.data() + offset, &object.moveStep, sizeof(object.moveStep));
+	return objData;
+}
+
+Sprite Engine::deserializeGameObject(std::vector<unsigned char> serializedGameObject)
+{
+	size_t offset = 0;
+
+	// Deserialize one object
+	int id;
+	std::memcpy(&id, &serializedGameObject[offset], sizeof(int));
+	offset += sizeof(int);
+
+	// Deserialize one object
+	SDL_FRect boundingBox;
+	std::memcpy(&boundingBox, &serializedGameObject[offset], sizeof(SDL_FRect));
+	offset += sizeof(SDL_FRect);
+
+	int moveStep;
+	std::memcpy(&moveStep, &serializedGameObject[offset], sizeof(int));
+
+	return Sprite(id, nullptr, boundingBox, moveStep);
+
+}
+
 

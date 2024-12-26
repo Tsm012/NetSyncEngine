@@ -11,9 +11,10 @@ namespace Network
 		Server();
 		~Server();
 		void start() override;
+		unsigned int handShake(Network::Message message) override;
 		bool canFindAPort();
 
 	private:
-		uint16_t port;
+		uint16_t port = 2000;
 	};
 }

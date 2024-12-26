@@ -3,62 +3,89 @@
 #include <mutex>
 #include <optional>
 #include <vector>
+#include <enet/enet.h>
+#include <map>
+#include <iostream>
+#include "Message.h" 
+#include <unordered_map>
 
 class ThreadSafeByteChannel
 {
 public:
-	void setDataToSend(std::vector<unsigned char> data)
+	ThreadSafeByteChannel() : dataToSend(), messageChannels()
+	{
+	}
+	void setDataToSend(Network::Message data)
 	{
 		std::lock_guard<std::mutex> lock(sendDataMtx);
-		dataToSend = data;  // Copy data to the vector
-		sendDataReady = true;
+		dataToSend.insert({ id++, data });  // Copy data to the vector
 		cvSend.notify_one();
 	}
 
-	std::optional<std::vector<unsigned char>> fetchSendData()
+	std::unordered_map<int, Network::Message> fetchSendData()
 	{
 		std::lock_guard<std::mutex> lock(sendDataMtx);
-		if (sendDataReady)
-		{
-			sendDataReady = false;
-			return dataToSend;
-		}
-		else
-		{
-			return std::nullopt;
-		}
+		return dataToSend;
 	}
 
-	void setReceivedData(std::vector<unsigned char> data)
+	void removeSendData(int id)
+	{
+		std::lock_guard<std::mutex> lock(sendDataMtx);
+		dataToSend.erase(id);
+	}
+
+	void clearSendData()
+	{
+		dataToSend.clear();
+
+	}
+
+	void clearMessageChannels()
+	{
+		messageChannels.clear();
+	}
+
+	void setReceivedData(int peerChannelId, Network::Message data)
 	{
 		std::lock_guard<std::mutex> lock(receviedDataMtx);
-		receivedData = data;  // Copy data to the vector
-		receivedDataReady = true;
+		messageChannels[peerChannelId].insert({ id++, data });
 		cvReceived.notify_one();
 	}
 
-	std::optional<std::vector<unsigned char>> fetchReceivedData()
+	void removeFetchData(int peerId, int messageId)
 	{
-		std::lock_guard<std::mutex> lock(receviedDataMtx);
-		if (receivedDataReady)
-		{
-			receivedDataReady = false;
-			return receivedData;
-		}
-		else
-		{
-			return std::nullopt;
-		}
+		std::lock_guard<std::mutex> lock(sendDataMtx);
+		messageChannels[peerId].erase(messageId);
 	}
 
+	std::map<int, std::unordered_map<int, Network::Message>> fetchReceivedData()
+	{
+		std::lock_guard<std::mutex> lock(receviedDataMtx);
+		return messageChannels;
+	}
+
+	void addMessageChannel(int peerChannelId)
+	{
+		std::lock_guard<std::mutex> lock(receviedDataMtx);
+		messageChannels[peerChannelId] = std::unordered_map<int, Network::Message>();
+	}
+
+	void removeMessageChannel(int peerChannelId)
+	{
+		std::lock_guard<std::mutex> lock(receviedDataMtx);
+		messageChannels.erase(peerChannelId);
+	}
+
+
+	std::vector<ENetPeer*> peers;
 private:
-	std::vector<unsigned char> receivedData;
-	bool receivedDataReady = false;
+	std::map<int, std::unordered_map<int, Network::Message>> messageChannels;
 	std::mutex receviedDataMtx;
 
-	std::vector<unsigned char> dataToSend;
-	bool sendDataReady = false;
+	std::unordered_map<int, Network::Message> dataToSend;
 	std::mutex sendDataMtx;
+
+	int id = 0;
 
 	std::condition_variable cvReceived;
 	std::condition_variable cvSend;
