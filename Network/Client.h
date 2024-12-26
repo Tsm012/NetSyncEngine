@@ -11,10 +11,19 @@ namespace Network
 		Client(const char* hostAddress, int port);
 		~Client();
 
+		enum ConnectionState
+		{
+			Initializing,
+			Connected
+		};
+
 
 		unsigned int generateRandomId();
 		void start() override;
-		unsigned int handShake(Network::Message message) override;
+		void sendHello(Network::Message message) override;
+		unsigned int getGreeting() override;
 		ENetPeer* peer;
+	private:
+		ConnectionState state = ConnectionState::Initializing;
 	};
 }

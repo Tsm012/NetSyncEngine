@@ -11,7 +11,8 @@ namespace Network
 		Server();
 		~Server();
 		void start() override;
-		unsigned int handShake(Network::Message message) override;
+		void sendHello(Network::Message message) override;
+		unsigned int getGreeting() override;
 		bool canFindAPort();
 
 	private:

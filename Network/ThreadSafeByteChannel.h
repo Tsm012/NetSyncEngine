@@ -34,17 +34,6 @@ public:
 		dataToSend.erase(id);
 	}
 
-	void clearSendData()
-	{
-		dataToSend.clear();
-
-	}
-
-	void clearMessageChannels()
-	{
-		messageChannels.clear();
-	}
-
 	void setReceivedData(int peerChannelId, Network::Message data)
 	{
 		std::lock_guard<std::mutex> lock(receviedDataMtx);

@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Server.h"
 #include <iostream>
+#include <stdexcept> r
 
 namespace Network
 {
@@ -9,17 +10,12 @@ namespace Network
 	{
 		if (enet_initialize() != 0)
 		{
-			std::cerr << "An error occurred while initializing ENet." << std::endl;
-			hasError = true;
-			return;
+			throw std::runtime_error("An error occurred while initializing ENet.");
 		}
 
 		if (!canFindAPort())
 		{
-			std::cerr << "Unable to find open port between 2000 - 4000"
-				<< std::endl;
-			hasError = true;
-			return;
+			throw std::runtime_error("Unable to find open port between 2000 - 4000");
 		}
 
 		ENetAddress address{};
@@ -29,12 +25,8 @@ namespace Network
 
 		if (host == nullptr)
 		{
-			std::cerr << "An error occurred while trying to create an ENet client host."
-				<< std::endl;
-			hasError = true;
-			return;
+			throw std::runtime_error("An error occurred while trying to create an ENet client host.");
 		}
-
 		connected = true;
 	}
 
@@ -65,10 +57,15 @@ namespace Network
 		}
 	}
 
-	unsigned int Server::handShake(Network::Message message)
+	void Server::sendHello(Network::Message message)
 	{
-		return false;
 	}
+
+	unsigned int Server::getGreeting()
+	{
+		return 0;
+	}
+
 
 	bool Server::canFindAPort()
 	{

@@ -60,7 +60,7 @@ void Engine::run()
 {
 	std::thread receiveThread(&NetworkConnection::receiveData, connection);
 
-	while (!connection->connected && !connection->hasError)
+	while (!connection->connected)
 	{
 		Sleep(100);
 	}
@@ -72,18 +72,18 @@ void Engine::run()
 
 	if (connectionType == ConnectionType::Client)
 	{
-		playerId = connection->handShake(message2);
+		connection->sendHello(message2);
 		while (playerId == 0)
 		{
 			std::this_thread::sleep_for(std::chrono::seconds(2));
-			playerId = connection->handShake(message2);
+			playerId = connection->getGreeting();
 		}
 		std::cout << "Player ID: " << playerId << std::endl; // Print the player ID here
 	}
 
 	std::thread sendThread(&NetworkConnection::start, connection);
 
-	while (running && connection->connected && !connection->hasError)
+	while (running && connection->connected)
 	{
 		update();
 	}
@@ -96,6 +96,35 @@ void Engine::run()
 void Engine::update()
 {
 	auto messageChannels = connection->getChannel().fetchReceivedData();
+	ProcessReceivedData(messageChannels);
+
+	SDL_Event event = ui.getInput();
+
+	if (event.type == SDL_EVENT_QUIT)
+	{
+		running = false;
+	}
+	else if (event.type == SDL_EVENT_KEY_DOWN)
+	{
+		if (connectionType == ConnectionType::Server)
+		{
+			updateGameObjects(event);
+			auto thing = Network::Message(Network::Message::Replication, serializeGameObjects(players));
+			connection->getChannel().setDataToSend(thing);
+		}
+		else
+		{
+			updateGameObjects(event);
+			auto thing = Network::Message(Network::Message::Replication, serializeGameObject(players[playerId]));
+			connection->getChannel().setDataToSend(thing);
+		}
+	}
+
+	ui.render(players, gameObjects);
+}
+
+void Engine::ProcessReceivedData(std::map<int, std::unordered_map<int, Network::Message>>& messageChannels)
+{
 	if (connectionType == ConnectionType::Server)
 	{
 		bool hit = false;
@@ -153,30 +182,6 @@ void Engine::update()
 			}
 		}
 	}
-
-	SDL_Event event = ui.getInput();
-
-	if (event.type == SDL_EVENT_QUIT)
-	{
-		running = false;
-	}
-	else if (event.type == SDL_EVENT_KEY_DOWN)
-	{
-		if (connectionType == ConnectionType::Server)
-		{
-			updateGameObjects(event);
-			auto thing = Network::Message(Network::Message::Replication, serializeGameObjects(players));
-			connection->getChannel().setDataToSend(thing);
-		}
-		else
-		{
-			updateGameObjects(event);
-			auto thing = Network::Message(Network::Message::Replication, serializeGameObject(players[playerId]));
-			connection->getChannel().setDataToSend(thing);
-		}
-	}
-
-	ui.render(players, gameObjects);
 }
 
 void Engine::updateGameObjects(SDL_Event event)

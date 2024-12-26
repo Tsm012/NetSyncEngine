@@ -40,7 +40,7 @@ void NetworkConnection::receiveData()
 		}
 		case ENET_EVENT_TYPE_RECEIVE:
 		{
-			auto message = Network::Message(event.packet->data, event.packet->dataLength);
+			Network::Message message = Network::Message(event.packet->data, event.packet->dataLength);
 			getChannel().setReceivedData(event.peer->incomingPeerID, message);
 			std::cout << "Received data of type: " << message.getMessageType() << std::endl;
 			enet_packet_destroy(event.packet);

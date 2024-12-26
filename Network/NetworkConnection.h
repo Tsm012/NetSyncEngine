@@ -8,7 +8,8 @@ class NetworkConnection
 public:
 	NetworkConnection();
 	virtual void start() = 0;
-	virtual unsigned int handShake(Network::Message message) = 0;
+	virtual void sendHello(Network::Message message) = 0;
+	virtual unsigned int getGreeting() = 0;
 	void receiveData();
 
 	ThreadSafeByteChannel& getChannel()
@@ -16,7 +17,6 @@ public:
 		return channel;
 	}
 	bool connected = false;
-	bool hasError = false;
 protected:
 	ENetHost* host;
 	ThreadSafeByteChannel channel;

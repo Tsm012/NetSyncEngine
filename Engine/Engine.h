@@ -27,6 +27,7 @@ public:
 
 private:
 	void update();
+	void ProcessReceivedData(std::map<int, std::unordered_map<int, Network::Message>>& messageChannels);
 	void updateGameObjects(SDL_Event event);
 	std::vector<unsigned char> serializeGameObject(Sprite gameObject);
 	Sprite deserializeGameObject(std::vector<unsigned char> serializedGameObject);

@@ -44,10 +44,14 @@ namespace Network
 		enet_deinitialize();
 	}
 
-	unsigned int Client::handShake(Network::Message message2)
+	void Network::Client::sendHello(Network::Message message2)
 	{
 		std::cout << "Sending message of type: " << message2.getMessageType() << std::endl;
 		sendData(peer, message2);
+	}
+
+	unsigned int Client::getGreeting()
+	{
 		auto channels = channel.fetchReceivedData();
 
 		for (auto& channel : channels)
@@ -64,7 +68,6 @@ namespace Network
 				}
 			}
 		}
-
 		return 0;
 	}
 
