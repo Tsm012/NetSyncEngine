@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include "Utilities.h"
+#include <random>
 
 std::map<std::string, std::string> parseCommandLineArguments(int argc,
 	char* argv[])
@@ -32,6 +34,14 @@ int getPort(std::map<std::string, std::string>& args)
 	}
 	std::cout << "Port argument not provided!" << std::endl;
 	exit(0);
+}
+
+int generateRandomId()
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dis(100000, 999999);
+	return dis(gen);
 }
 
 const char* getHost(std::map<std::string, std::string>& args)

@@ -11,19 +11,9 @@ namespace Network
 		Client(const char* hostAddress, int port);
 		~Client();
 
-		enum ConnectionState
-		{
-			Initializing,
-			Connected
-		};
-
-
-		unsigned int generateRandomId();
 		void start() override;
-		void sendHello(Network::Message message) override;
-		unsigned int getGreeting() override;
-		ENetPeer* peer;
+		unsigned int initialize() override;
 	private:
-		ConnectionState state = ConnectionState::Initializing;
+		ENetPeer* peer;
 	};
 }

@@ -11,9 +11,7 @@ namespace Network
 		Server();
 		~Server();
 		void start() override;
-		void sendHello(Network::Message message) override;
-		unsigned int getGreeting() override;
-		bool canFindAPort();
+		unsigned int initialize() override;
 
 	private:
 		uint16_t port = 2000;

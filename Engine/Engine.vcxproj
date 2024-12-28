@@ -159,7 +159,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Utilities;$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -178,7 +178,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Utilities;$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -199,7 +199,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Utilities;$(SolutionDir)UI;$(SolutionDir)Network;$(SolutionDir)dependencies\SDL\include;$(SolutionDir)dependencies\SDL_image\include;$(SolutionDir)dependencies\enet-1.3.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -232,6 +232,9 @@
     </ProjectReference>
     <ProjectReference Include="..\UI\UI.vcxproj">
       <Project>{185dcf30-f170-4f0b-970a-b86deb38b549}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.vcxproj">
+      <Project>{02b7ddc5-4054-4676-8ecc-aa6be35e7487}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

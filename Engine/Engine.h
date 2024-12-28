@@ -16,8 +16,6 @@ public:
 	// Default constructor
 	Engine();
 
-	int generateRandomId();
-
 	// Parameterized constructor
 	Engine(ConnectionType connectionType, const char* host, int port);
 
@@ -34,8 +32,8 @@ private:
 	std::vector<unsigned char> serializeGameObjects(const std::unordered_map<unsigned int, Sprite>& gameObjects);
 	std::unordered_map<unsigned int, Sprite> deserializeGameObjects(const std::vector<unsigned char>& serializedGameObjects);
 	UI ui;
-	NetworkConnection* connection;
 	ConnectionType connectionType;
+	NetworkConnection* connection;
 	const char* host;
 	int port;
 	float spawnX = 100;

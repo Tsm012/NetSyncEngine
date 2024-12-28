@@ -26,14 +26,14 @@ NetworkConnection::NetworkConnection() : host(nullptr), channel()
 void NetworkConnection::receiveData()
 {
 	ENetEvent event;
-	while (enet_host_service(host, &event, 1000000) > 0)
+	// 1 hour timeout
+	while (enet_host_service(host, &event, 360000) > 0 && connected)
 	{
 		switch (event.type)
 		{
 		case ENET_EVENT_TYPE_CONNECT:
 		{
 			std::cout << "A new connection is established." << std::endl;
-			connected = true;
 			getChannel().peers.push_back(event.peer);
 			getChannel().addMessageChannel(event.peer->incomingPeerID);
 			break;
@@ -42,7 +42,6 @@ void NetworkConnection::receiveData()
 		{
 			Network::Message message = Network::Message(event.packet->data, event.packet->dataLength);
 			getChannel().setReceivedData(event.peer->incomingPeerID, message);
-			std::cout << "Received data of type: " << message.getMessageType() << std::endl;
 			enet_packet_destroy(event.packet);
 			break;
 		}
@@ -56,4 +55,15 @@ void NetworkConnection::receiveData()
 		}
 	}
 }
+
+void NetworkConnection::stop()
+{
+	connected = false;
+	for (auto peer : getChannel().peers)
+	{
+		enet_peer_disconnect(peer, 0);
+	}
+	enet_host_flush(host);
+}
+
 

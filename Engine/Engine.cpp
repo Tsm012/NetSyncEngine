@@ -5,8 +5,8 @@
 #include <map>
 #include <Client.h>
 #include <Server.h>
-#include <random>
 #include <thread>
+#include <Utilities.h>
 
 Engine::Engine() : connectionType(Server), host("localhost"), port(2000)
 {
@@ -14,14 +14,6 @@ Engine::Engine() : connectionType(Server), host("localhost"), port(2000)
 	auto texture = ui.loadTexture("Player.bmp");
 	playerId = generateRandomId();
 	players.insert({ playerId, Sprite(playerId, texture, SDL_FRect{250, 100, 175, 100}, 15) });
-}
-
-int Engine::generateRandomId()
-{
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dis(100000, 999999);
-	return dis(gen);
 }
 
 Engine::Engine(ConnectionType connectionType, const char* host, int port)
@@ -59,39 +51,29 @@ void Engine::initialize(Engine::ConnectionType connectionType, const char* host,
 void Engine::run()
 {
 	std::thread receiveThread(&NetworkConnection::receiveData, connection);
+	std::thread sendThread(&NetworkConnection::start, connection);
 
 	while (!connection->connected)
 	{
 		Sleep(100);
 	}
 
-	auto thing = generateRandomId();
-	auto thing2 = std::vector<unsigned char>();
-	thing2.push_back(thing);
-	auto message2 = Network::Message(Network::Message::Hello, thing2);
-
-	if (connectionType == ConnectionType::Client)
+	if (connectionType == Engine::ConnectionType::Client)
 	{
-		connection->sendHello(message2);
-		while (playerId == 0)
-		{
-			std::this_thread::sleep_for(std::chrono::seconds(2));
-			playerId = connection->getGreeting();
-		}
-		std::cout << "Player ID: " << playerId << std::endl; // Print the player ID here
+		playerId = connection->initialize();
 	}
 
-	std::thread sendThread(&NetworkConnection::start, connection);
-
-	while (running && connection->connected)
+	while (running)
 	{
 		update();
 	}
 
+	connection->stop();
 	sendThread.join();
 	receiveThread.join();
 	ui.cleanup(players, gameObjects);
 }
+
 
 void Engine::update()
 {
@@ -138,12 +120,9 @@ void Engine::ProcessReceivedData(std::map<int, std::unordered_map<int, Network::
 					unsigned int playerId = 0;
 					std::memcpy(&playerId, message.second.getPayload().data(), sizeof(unsigned int));
 					players.insert_or_assign(playerId, Sprite(playerId, ui.loadTexture("./Player.bmp"), SDL_FRect{ spawnX, 100, 175, 100 }, 15));
-					spawnX = spawnX + 100;
-					auto thing2 = std::vector<unsigned char>(sizeof(unsigned int));
-					std::memcpy(thing2.data(), &playerId, sizeof(unsigned int));
-					std::cout << "Result: " << playerId << "\n";
-					thing2.push_back(playerId);
-					auto thing = Network::Message(Network::Message::Hello, thing2);
+					auto serializedPlayerId = std::vector<unsigned char>(sizeof(unsigned int));
+					std::memcpy(serializedPlayerId.data(), &playerId, sizeof(unsigned int));
+					auto thing = Network::Message(Network::Message::Hello, serializedPlayerId);
 					connection->getChannel().setDataToSend(thing);
 				}
 				else
@@ -165,9 +144,9 @@ void Engine::ProcessReceivedData(std::map<int, std::unordered_map<int, Network::
 	}
 	else
 	{
-		for (auto channel : messageChannels)
+		for (auto& channel : messageChannels)
 		{
-			for (auto message : channel.second)
+			for (auto& message : channel.second)
 			{
 				if (message.second.getMessageType() == message.second.Replication)
 				{
@@ -199,6 +178,9 @@ void Engine::updateGameObjects(SDL_Event event)
 		break;
 	case SDL_SCANCODE_RIGHT:
 		players[playerId].boundingBox.x += players[playerId].moveStep;
+		break;
+	case SDL_SCANCODE_ESCAPE:
+		running = false;
 		break;
 	}
 }

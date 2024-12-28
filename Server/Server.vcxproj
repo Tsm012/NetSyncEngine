@@ -203,8 +203,7 @@ copy $(SolutionDir)dependencies\SDL_image\VisualC\x64\Release\SDL3_image.dll $(P
       <AdditionalDependencies>enet64.lib;Shell32.lib;SDL3.lib;winmm.lib;ws2_32.lib;setupapi.lib;version.lib;SDL3_image.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)UI\Player.bmp $(ProjectDir)$(Platform)\$(Configuration)\
-copy $(SolutionDir)dependencies\SDL_image\VisualC\x64\Release\SDL3_image.dll $(ProjectDir)$(Platform)\$(Configuration)\</Command>
+      <Command>copy $(SolutionDir)UI\Player.bmp $(ProjectDir)$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Package|x64'">

@@ -13,15 +13,12 @@ namespace Network
 			throw std::runtime_error("An error occurred while initializing ENet.");
 		}
 
-		if (!canFindAPort())
-		{
-			throw std::runtime_error("Unable to find open port between 2000 - 4000");
-		}
+		initialize();
 
 		ENetAddress address{};
 		address.host = ENET_HOST_ANY;
 		address.port = port;
-		host = enet_host_create(&address, 1, 2, 0, 0);
+		host = enet_host_create(&address, 20, 2, 0, 0);
 
 		if (host == nullptr)
 		{
@@ -41,7 +38,7 @@ namespace Network
 
 	void Server::start()
 	{
-		while (true)
+		while (connected)
 		{
 			auto messages = channel.fetchSendData();
 
@@ -50,38 +47,27 @@ namespace Network
 				for (auto& message : messages)
 				{
 					sendData(peer, message.second);
-					std::cout << "Sent message of type: " << message.second.getMessageType() << " to peer." << std::endl;
 					channel.removeSendData(message.first);
 				}
 			}
 		}
 	}
 
-	void Server::sendHello(Network::Message message)
-	{
-	}
-
-	unsigned int Server::getGreeting()
-	{
-		return 0;
-	}
-
-
-	bool Server::canFindAPort()
+	unsigned int Server::initialize()
 	{
 		ENetAddress address{};
 		address.host = ENET_HOST_ANY;
 		for (port = 2000; port <= 4000; port++)
 		{
 			address.port = port;
-			ENetHost* server = enet_host_create(&address, 1, 2, 0, 0);
+			ENetHost* server = enet_host_create(&address, 2, 2, 0, 0);
 			if (server)
 			{
 				enet_host_destroy(server);
 				std::cout << "Server port selected: " << port << std::endl;
-				return true;
+				return 0;
 			}
 		}
-		return false;
+		throw std::runtime_error("Unable to find open port between 2000 - 4000");
 	}
 }
