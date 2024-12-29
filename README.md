@@ -1,4 +1,4 @@
-# NetSyncSDL
+# NetSync Engine
 
 NetSyncSDL is an educational 2D game engine designed to teach the principles of creating networked games in C++. It leverages SDL2 for rendering and ENet for network replication, providing a solid foundation for learning and development.
 
