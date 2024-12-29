@@ -23,3 +23,13 @@ NetSyncSDL is an educational 2D game engine designed to teach the principles of 
    ```sh
    git clone https://github.com/yourusername/NetSyncSDL.git
    cd NetSyncSDL
+
+Set Up in Visual Studio:
+
+Open the project in Visual Studio.
+
+Set the startup projects to multiple projects and select both "Client" and "Server".
+
+Run in debug mode.
+
+That's it! You should now have NetSyncSDL up and running. 🎮
