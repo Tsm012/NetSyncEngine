@@ -1,23 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-port=2000 -host=localhost</LocalDebuggerCommandArguments>
-    <RemoteDebuggerCommandArguments>-port=2000 -host=localhost</RemoteDebuggerCommandArguments>
-    <LocalDebuggerWorkingDirectory>$(ProjectDir)$(Platform)\$(Configuration)</LocalDebuggerWorkingDirectory>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>-port=2000 -host=localhost</LocalDebuggerCommandArguments>
-    <RemoteDebuggerCommandArguments>-port=2000 -host=localhost</RemoteDebuggerCommandArguments>
-    <LocalDebuggerWorkingDirectory>$(ProjectDir)$(Platform)\$(Configuration)</LocalDebuggerWorkingDirectory>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Package|x64'">
-    <LocalDebuggerCommandArguments>-port=2000 -host=localhost</LocalDebuggerCommandArguments>
-    <RemoteDebuggerCommandArguments>-port=2000 -host=localhost</RemoteDebuggerCommandArguments>
-    <LocalDebuggerWorkingDirectory>$(ProjectDir)$(Platform)\$(Configuration)</LocalDebuggerWorkingDirectory>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-  </PropertyGroup>
 
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -45,6 +27,24 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommandArguments>-port=2000 -host=localhost</LocalDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-port=2000 -host=localhost</RemoteDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)$(Platform)\$(Configuration)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments>-port=2000 -host=localhost</LocalDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-port=2000 -host=localhost</RemoteDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)$(Platform)\$(Configuration)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Package|x64'">
+    <LocalDebuggerCommandArguments>-port=2000 -host=localhost</LocalDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-port=2000 -host=localhost</RemoteDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)$(Platform)\$(Configuration)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
